@@ -4,7 +4,7 @@
 
 ## ✨ 特性
 
-🏭 工作单元（UnitOfWork）模式
+🏭 工作单元（UnitOfWork）模式，事务级别存储
 
 📦 通用仓储模式
 
@@ -65,7 +65,18 @@ public class UserService
         await repository.AddAsync(user);
         await _unitOfWork.CommitAsync();
     }
-}
+
+    public asyn Task CreateUserAsync(User user,UserRole role)
+    {
+         var repository = _unitOfWork.GetRepository<User>();
+        _unitofWork.ExecuteTransactionAsync(()=>
+        {
+            //事务内工作
+            repository.SaveRepository();
+        });
+        //保存
+        await _unitofWork.CommitAsync();
+    }
 ```
 
 ## 💡 主要功能
