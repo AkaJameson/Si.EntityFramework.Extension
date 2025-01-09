@@ -1,18 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Si.EntityFramework.Extension.Entity;
+using Si.EntityFramework.Extension.Interface;
 using System.Linq.Expressions;
 
 namespace Si.Framework.EntityFramework.UnitofWork
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        private readonly SiDbContext _dbContext;
-        private readonly DbSet<T> DbSet;
-
+        protected readonly SiDbContext _dbContext;
+        protected readonly DbSet<T> DbSet;
+        protected readonly SiDbContextOptions _options;
         public Repository(SiDbContext dbContext)
         {
             _dbContext = dbContext;
             DbSet = _dbContext.Set<T>();
+            _options = (_dbContext as SiDbContextBase)?._siDbContextOptions ?? new SiDbContextOptions();
         }
         public async Task<IEnumerable<T>> GetAllAsync()
         {
@@ -152,28 +155,174 @@ namespace Si.Framework.EntityFramework.UnitofWork
             return Task.CompletedTask;
         }
 
+
+        public async Task<bool> IsSoftDeleteEnabled()
+        {
+            return _options.EnableSoftDelete && typeof(ISoftDelete).IsAssignableFrom(typeof(T));
+        }
+
+        public async Task SoftDeleteAsync(T entity)
+        {
+            if (!await IsSoftDeleteEnabled())
+            {
+                return;
+            }
+            if (entity is ISoftDelete softDelete)
+            {
+                softDelete.IsDeleted = true;
+                softDelete.DeletedTime = DateTime.Now;
+                if (entity is IFullAudited fullAudited && _dbContext is SiDbContextBase siContext)
+                {
+                    fullAudited.DeletedBy = siContext._currentUser?.UserId ?? "System";
+                }
+                await UpdateAsync(entity);
+            }
+        }
+
+        public async Task SoftDeleteRangeAsync(IEnumerable<T> entities)
+        {
+            if (!await IsSoftDeleteEnabled())
+            {
+                await DeleteRangeAsync(entities);
+                return;
+            }
+
+            foreach (var entity in entities)
+            {
+                await SoftDeleteAsync(entity);
+            }
+        }
+
+        public async Task RestoreAsync(T entity)
+        {
+            if (!await IsSoftDeleteEnabled())
+            {
+                throw new InvalidOperationException("Soft delete is not enabled for this entity.");
+            }
+
+            if (entity is ISoftDelete softDelete)
+            {
+                softDelete.IsDeleted = false;
+                softDelete.DeletedTime = null;
+
+                if (entity is IFullAudited fullAudited)
+                {
+                    fullAudited.DeletedBy = null;
+                }
+
+                await UpdateAsync(entity);
+            }
+        }
+
+        public async Task RestoreRangeAsync(IEnumerable<T> entities)
+        {
+            if (!await IsSoftDeleteEnabled())
+            {
+                throw new InvalidOperationException("Soft delete is not enabled for this entity.");
+            }
+
+            foreach (var entity in entities)
+            {
+                await RestoreAsync(entity);
+            }
+        }
+
+        public IQueryable<T> GetAllIncludeDeleted()
+        {
+            if (!_options.EnableSoftDelete || !typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
+            {
+                return DbSet;
+            }
+
+            // 移除软删除过滤器
+            return DbSet.IgnoreQueryFilters();
+        }
+
         public async Task<int> SaveRepository(CancellationToken cancellationToken = default)
         {
             var entries = _dbContext.ChangeTracker.Entries().ToList();
-            // 暂时将不相关的实体标记为Unchanged
             var otherEntries = entries
                 .Where(e => e.Entity.GetType() != typeof(T))
                 .ToList();
             var originalStates = new Dictionary<EntityEntry, EntityState>();
+
             try
             {
-                // 保存其他实体的原始状态并将其设置为Unchanged
                 foreach (var entry in otherEntries)
                 {
                     originalStates[entry] = entry.State;
                     entry.State = EntityState.Unchanged;
                 }
-                var result = await _dbContext.SaveChangesAsync(cancellationToken);
-                return result;
+
+                // 仅当启用相应功能时才应用特性
+                if (_dbContext is SiDbContextBase siContext)
+                {
+                    var currentTypeEntries = entries
+                        .Where(e => e.Entity.GetType() == typeof(T))
+                        .ToList();
+
+                    // 应用雪花ID
+                    if (_options.EnableSnowflakeId)
+                    {
+                        foreach (var entry in currentTypeEntries.Where(e =>
+                            e.State == EntityState.Added && e.Entity is ISnowflakeId))
+                        {
+                            if (entry.Entity is ISnowflakeId entity)
+                            {
+                                entity.Id = siContext._idGenerator.Fetch();
+                            }
+                        }
+                    }
+
+                    // 应用软删除
+                    if (_options.EnableSoftDelete)
+                    {
+                        foreach (var entry in currentTypeEntries.Where(e =>
+                            e.State == EntityState.Deleted && e.Entity is ISoftDelete))
+                        {
+                            if (entry.Entity is ISoftDelete softDelete)
+                            {
+                                entry.State = EntityState.Modified;
+                                softDelete.IsDeleted = true;
+                                softDelete.DeletedTime = DateTime.Now;
+                            }
+                        }
+                    }
+
+                    // 应用审计
+                    if (_options.EnableAudit)
+                    {
+                        var userId = siContext._currentUser?.UserId ?? "System";
+
+                        foreach (var entry in currentTypeEntries)
+                        {
+                            if (entry.Entity is ICreationAudited creationAudited &&
+                                entry.State == EntityState.Added)
+                            {
+                                creationAudited.CreatedBy = userId;
+                                creationAudited.CreatedTime = DateTime.Now;
+                            }
+
+                            if (entry.Entity is IModificationAudited modificationAudited &&
+                                entry.State == EntityState.Modified)
+                            {
+                                modificationAudited.LastModifiedBy = userId;
+                                modificationAudited.LastModifiedTime = DateTime.Now;
+                            }
+
+                            if (entry.Entity is IFullAudited fullAudited &&
+                                entry.State == EntityState.Deleted)
+                            {
+                                fullAudited.DeletedBy = userId;
+                            }
+                        }
+                    }
+                }
+
+                return await _dbContext.SaveChangesAsync(cancellationToken);
             }
             finally
             {
-                // 恢复其他实体的原始状态
                 foreach (var entry in otherEntries)
                 {
                     if (originalStates.ContainsKey(entry))
@@ -182,7 +331,6 @@ namespace Si.Framework.EntityFramework.UnitofWork
                     }
                 }
             }
-
         }
     }
 }

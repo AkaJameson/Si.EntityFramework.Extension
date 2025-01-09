@@ -1,4 +1,4 @@
-﻿namespace Si.Framework.EntityFramework.UnitofWork
+﻿namespace Si.EntityFramework.Extension.Interface
 {
     public interface IUnitOfWork : IDisposable
     {
@@ -14,15 +14,18 @@
         /// </summary>
         /// <returns>受影响的行数</returns>
         Task<int> CommitAsync();
-
         /// <summary>
         /// 异步执行事务
         /// </summary>
         /// <param name="action">事务操作</param>
         Task ExecuteTransactionAsync(Func<Task> action);
-
+        /// <summary>
+        /// 异步执行事务，重试次数
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="retryCount"></param>
+        /// <returns></returns>
         Task ExecuteTransactionWithRetryAsync(Func<Task> action, int retryCount = 3);
-
         /// <summary>
         /// 回滚未提交的更改
         /// </summary>

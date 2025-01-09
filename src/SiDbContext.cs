@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Si.EntityFramework.Extension.Entity;
 using Si.Framework.EntityFramework.Kit;
-using System;
-using System.Collections.Concurrent;
 
 namespace Si.Framework.EntityFramework
 {
     public class SiDbContext : SiDbContextBase
     {
-        public SiDbContext(DbContextOptions options, IdGenerator idGenerator = null) : base(options, idGenerator)
+        public SiDbContext(DbContextOptions options, SiDbContextOptions optionsExtension ,ICurrentUser currentUser = null) : base(options, optionsExtension, currentUser)
         {
         }
         public IQueryable<T> ReadQuery<T>() where T : class

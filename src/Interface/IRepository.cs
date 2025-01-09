@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Si.Framework.EntityFramework.UnitofWork
+namespace Si.EntityFramework.Extension.Interface
 {
     public interface IRepository<T> where T : class
     {
@@ -118,5 +118,13 @@ namespace Si.Framework.EntityFramework.UnitofWork
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<int> SaveRepository(CancellationToken cancellationToken = default);
+        Task<bool> IsSoftDeleteEnabled();
+        Task SoftDeleteAsync(T entity);
+        Task SoftDeleteRangeAsync(IEnumerable<T> entities);
+        Task RestoreAsync(T entity);
+        Task RestoreRangeAsync(IEnumerable<T> entities);
+
+        // 获取包含已软删除项的查询 - 仅当启用软删除时可用
+        IQueryable<T> GetAllIncludeDeleted();
     }
 }

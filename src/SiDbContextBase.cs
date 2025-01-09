@@ -1,23 +1,52 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.Framework.EntityFramework.Abstraction;
+using Si.EntityFramework.Extension.Entity;
+using Si.EntityFramework.Extension.Interface;
 using Si.Framework.EntityFramework.Kit;
 
 namespace Si.Framework.EntityFramework
 {
-    public class SiDbContextBase:DbContext
+    public class SiDbContextBase: DbContext
     {
-        protected readonly IdGenerator _idGenerator;
-        protected SiDbContextBase(DbContextOptions options, IdGenerator idGenerator = null)
+        internal readonly IdGenerator _idGenerator;
+        protected internal readonly SiDbContextOptions _siDbContextOptions;
+        protected internal readonly ICurrentUser _currentUser;
+        protected SiDbContextBase(DbContextOptions options,SiDbContextOptions siOptions,ICurrentUser currentUser =null)
             : base(options)
         {
-            _idGenerator = idGenerator;
+            _siDbContextOptions = siOptions;
+            _currentUser = currentUser;
+            if (_siDbContextOptions.EnableSnowflakeId)
+            {
+                _idGenerator = new IdGenerator(_siDbContextOptions.WorkerId, _siDbContextOptions.DatacenterId);
+            }
+        }
+        private void ApplyFeatures()
+        {
+            if (_siDbContextOptions.EnableSnowflakeId)
+            {
+                ApplySnowflakeId();
+            }
+
+            if (_siDbContextOptions.EnableSoftDelete)
+            {
+                UpdateSoftDeleteState();
+            }
+
+            if (_siDbContextOptions.EnableAudit)
+            {
+                ApplyAuditInfo();
+            }
+        }
+        public override int SaveChanges()
+        {
+            ApplyFeatures();
+            return base.SaveChanges();
         }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            ApplySnowflakeId();
+            ApplyFeatures();
             return base.SaveChangesAsync(cancellationToken);
         }
-
         private void ApplySnowflakeId()
         {
             if (_idGenerator == null) return;
@@ -30,6 +59,51 @@ namespace Si.Framework.EntityFramework
                 if (entry.Entity is ISnowflakeId entity)
                 {
                     entity.Id = _idGenerator.Fetch();
+                }
+            }
+        }
+        private void UpdateSoftDeleteState()
+        {
+            foreach(var entry in ChangeTracker.Entries())
+            {
+                if (entry.Entity is ISoftDelete softDelete)
+                {
+                    switch (entry.State)
+                    {
+                        case EntityState.Deleted:
+                            entry.State = EntityState.Modified;
+                            softDelete.IsDeleted = true;
+                            softDelete.DeletedTime = DateTime.Now;
+                            break;
+                    }
+                }
+            }
+        }
+        private void ApplyAuditInfo()
+        {
+            var userId = _currentUser?.UserId ?? "System";
+            var entries = ChangeTracker.Entries().ToList();
+
+            foreach (var entry in entries)
+            {
+                if (entry.Entity is ICreationAudited creationAudited && entry.State == EntityState.Added)
+                {
+                    creationAudited.CreatedBy = userId;
+                    creationAudited.CreatedTime = DateTime.Now;
+                }
+
+                if (entry.Entity is IModificationAudited modificationAudited && entry.State == EntityState.Modified)
+                {
+                    modificationAudited.LastModifiedBy = userId;
+                    modificationAudited.LastModifiedTime = DateTime.Now;
+                }
+
+                if (entry.Entity is IFullAudited fullAudited && entry.State == EntityState.Deleted)
+                {
+                    entry.State = EntityState.Modified;
+                    fullAudited.IsDeleted = true;
+                    fullAudited.DeletedTime = DateTime.Now;
+                    fullAudited.DeletedBy = userId;
                 }
             }
         }

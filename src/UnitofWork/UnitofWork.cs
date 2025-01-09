@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Si.EntityFramework.Extension.Interface;
 
 namespace Si.Framework.EntityFramework.UnitofWork
 {
