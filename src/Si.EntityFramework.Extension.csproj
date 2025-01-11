@@ -3,22 +3,28 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>8.0.1</Version>
+		<Version>8.0.4</Version>
 		<Authors>Simon Jameson</Authors>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageLicenseFile>License</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageProjectUrl>https://github.com/AkaJameson/Si.EntityFramework.Extension.git</PackageProjectUrl>
+		<Copyright>
+			Copyright © 2022
+			<NAME>. All rights reserved.</NAME>
+		</Copyright>
+		<Description>A set of extension methods for Microsoft.EntityFrameworkCore. Project URL: https://github.com/AkaJameson/Si.EntityFramework.Extension.git</Description>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Include="..\License">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Include="..\License">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />

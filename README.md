@@ -29,7 +29,7 @@
 ## 📦 安装
 
 ```
-dotnet add package Si.Framework.EntityFramework
+paket add Si.EntityFramework.Extension --version xxxxx
 ```
 
 ## 🚀 快速开始
@@ -54,9 +54,8 @@ services.AddScoped<ICurrentUser, YourCurrentUserImplementation>();
 ```c#
 public class YourDbContext : SiDbContextBase
 {
-	public YourDbContext(DbContextOptions<YourDbContext> options,IOptions<SiDbContextOptions> siOptions,ICurrentUser currentUser = null): 		base(options, siOptions.Value, currentUser)
+	public YourDbContext(DbContextOptions<YourDbContext> options,IOptions<SiDbContextOptions> siOptions,ICurrentUser currentUser = null):base(options, siOptions.Value, currentUser)
 	{
-	
 	}
 }
 ```
@@ -178,6 +177,78 @@ var result = await dbContext.Database.FromSqlCollectionAsync<UserDto>(
 );
 ```
 
+### JSON字段支持
+
+支持将复杂对象或集合以JSON格式存储在数据库中：
+
+```csharp
+// 实体配置
+public class UserConfiguration : IEntityTypeConfiguration<User>
+{
+    public void Configure(EntityTypeBuilder<User> builder)
+    {
+        // 配置复杂类型属性为JSON存储
+        builder.Property(u => u.Address)
+            .HasJsonConversion();
+            
+        // 配置集合类型为JSON存储
+        builder.Property(u => u.Tags)
+            .HasJsonConversion();
+    }
+}
+
+// 使用自定义JSON选项
+var jsonOptions = new JsonSerializerOptions
+{
+    PropertyNameCaseInsensitive = true,
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    WriteIndented = true
+};
+
+builder.Property(u => u.Address)
+    .HasJsonConversion(jsonOptions);
+```
+
+### 查询扩展
+
+提供多个便捷的查询扩展方法：
+
+```csharp
+// 条件查询
+var query = dbContext.Users
+    .WhereIf(!string.IsNullOrEmpty(name), u => u.Name.Contains(name))
+    .WhereIf(age > 0, u => u.Age > age);
+// 分页查询
+var (items, total) = await query.ToPagedListAsync(pageIndex, pageSize);
+// 无跟踪查询
+var users = query.AsNoTracking(condition: true);
+```
+
+### JSON序列化选项
+
+```csharp
+var options = new JsonSerializerOptions
+{
+    PropertyNameCaseInsensitive = true,
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    WriteIndented = true // 格式化JSON
+};
+
+// 在实体配置中使用
+builder.Property(u => u.ComplexData)
+    .HasJsonConversion(options);
+```
+
+### 分页查询
+
+```csharp
+// 基础分页
+var pagedData = await query.PageBy(pageIndex, pageSize).ToListAsync();
+
+// 带总数的分页
+var (items, total) = await query.ToPagedListAsync(pageIndex, pageSize);
+```
+
 ## 📚 API文档
 
 ### IUnitOfWork
@@ -235,13 +306,66 @@ await repository.UpdateRangeAsync(entities);
 await repository.DeleteRangeAsync(entities);
 ```
 
-### 功能开关配置
+### 并发控制
 
+提供悲观锁和乐观锁机制：
+
+```csharp
+// 悲观锁
+var user = await dbContext.GetWithLockAsync<User>(userId);
+user.Name = "新名字";
+await dbContext.SaveChangesAsync();
+
+// 乐观锁
+var success = await dbContext.TryOptimisticUpdateAsync(user, entity => 
+{
+    entity.Name = "新名字";
+});
 ```
-可以通过 SiDbContextOptions 灵活配置功能:
+
+支持多种数据库的锁实现：
+- SQL Server: `WITH (UPDLOCK, ROWLOCK)`
+- PostgreSQL: `FOR UPDATE`
+- MySQL/MariaDB: `FOR UPDATE`
+
+### 并发控制策略
+
+```csharp
+// 带重试的悲观锁
+public async Task UpdateWithRetryAsync(long id)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        try
+        {
+            var entity = await _dbContext.GetWithLockAsync<User>(id);
+            // 更新操作
+            await _dbContext.SaveChangesAsync();
+            break;
+        }
+        catch (Exception) when (i < 2)
+        {
+            await Task.Delay(100 * (i + 1));
+        }
+    }
+}
 ```
 
 ## 📝 注意事项
+
+### JSON字段注意事项
+
+- JSON字段在数据库中存储为文本类型
+- 不支持直接在JSON字段上进行数据库级别的查询
+- 需要考虑JSON字段的大小限制
+- 建议为频繁查询的字段创建额外的列而不是放在JSON中
+
+### 并发控制注意事项
+
+- 悲观锁会降低并发性能，建议仅在必要时使用
+- 不同数据库的锁实现可能略有差异
+- 使用乐观锁时需要处理更新失败的情况
+- 建议配合重试机制使用
 
 雪花ID生成器需要确保 workerId 和 datacenterId 在分布式环境中的唯一性
 
