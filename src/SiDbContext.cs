@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Si.EntityFramework.Extension.Entity;
-using Si.Framework.EntityFramework.Kit;
 
 namespace Si.Framework.EntityFramework
 {
