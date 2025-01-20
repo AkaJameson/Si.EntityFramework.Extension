@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Si.EntityFramework.Extension.Interface
+namespace Si.EntityFramework.Extension.Abstraction
 {
     public interface IRepository<T> where T : class
     {

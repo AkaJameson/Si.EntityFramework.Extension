@@ -1,16 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.EntityFramework.Extension.Entity;
+using Si.EntityFramework.Extension.Entitys;
 
-namespace Si.Framework.EntityFramework
+namespace Si.EntityFramework.Extension.DataBase
 {
     public class SiDbContext : SiDbContextBase
     {
-        public SiDbContext(DbContextOptions options, SiDbContextOptions optionsExtension ,ICurrentUser currentUser = null) : base(options, optionsExtension, currentUser)
+        public SiDbContext(DbContextOptions options, SiDbContextOptions optionsExtension, ICurrentUser currentUser = null) : base(options, optionsExtension, currentUser)
         {
         }
         public IQueryable<T> ReadQuery<T>() where T : class
         {
-            return this.Set<T>().AsNoTracking();
+            return Set<T>().AsNoTracking();
         }
         /// <summary>
         /// 异步执行事务操作

@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
-using Si.Framework.EntityFramework.Entity;
+using Si.EntityFramework.Extension.Entitys;
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Diagnostics;
 
-namespace Si.Framework.EntityFramework.Kit
+namespace Si.EntityFramework.Extension.Kits
 {
     public class QueryPerformanceInterceptor : IInterceptor
     {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using System.Data.Common;
 
-namespace Si.Framework.EntityFramework.Extension
+namespace Si.EntityFramework.Extension.Helper
 {
     public static class DatabaseFacadeExtentions
     {

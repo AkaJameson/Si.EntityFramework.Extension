@@ -1,4 +1,4 @@
-﻿namespace Si.Framework.EntityFramework.Kit
+﻿namespace Si.EntityFramework.Extension.Kits
 {
     /// <summary>
     /// 高性能雪花算法实现

@@ -1,4 +1,4 @@
-﻿namespace Si.EntityFramework.Extension.Entity
+﻿namespace Si.EntityFramework.Extension.Entitys
 {
     public class SiDbContextOptions
     {

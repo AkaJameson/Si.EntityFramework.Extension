@@ -1,16 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.EntityFramework.Extension.Entity;
-using Si.EntityFramework.Extension.Interface;
-using Si.Framework.EntityFramework.Kit;
+using Si.EntityFramework.Extension.Abstraction;
+using Si.EntityFramework.Extension.Entitys;
+using Si.EntityFramework.Extension.Kits;
 
-namespace Si.Framework.EntityFramework
+namespace Si.EntityFramework.Extension.DataBase
 {
-    public class SiDbContextBase: DbContext
+    public class SiDbContextBase : DbContext
     {
         internal readonly IdGenerator _idGenerator;
         protected internal readonly SiDbContextOptions _siDbContextOptions;
         protected internal readonly ICurrentUser _currentUser;
-        protected SiDbContextBase(DbContextOptions options,SiDbContextOptions siOptions,ICurrentUser currentUser =null)
+        protected SiDbContextBase(DbContextOptions options, SiDbContextOptions siOptions, ICurrentUser currentUser = null)
             : base(options)
         {
             _siDbContextOptions = siOptions;
@@ -64,7 +64,7 @@ namespace Si.Framework.EntityFramework
         }
         private void UpdateSoftDeleteState()
         {
-            foreach(var entry in ChangeTracker.Entries())
+            foreach (var entry in ChangeTracker.Entries())
             {
                 if (entry.Entity is ISoftDelete softDelete)
                 {

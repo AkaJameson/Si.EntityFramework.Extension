@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Si.EntityFramework.Extension.Entity;
-using Si.EntityFramework.Extension.Interface;
+using Si.EntityFramework.Extension.Abstraction;
+using Si.EntityFramework.Extension.DataBase;
+using Si.EntityFramework.Extension.Entitys;
 using System.Linq.Expressions;
 
-namespace Si.Framework.EntityFramework.UnitofWork
+namespace Si.EntityFramework.Extension.UnitofWork
 {
     public class Repository<T> : IRepository<T> where T : class
     {

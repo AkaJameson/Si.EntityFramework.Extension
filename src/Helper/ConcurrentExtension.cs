@@ -1,18 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.Framework.EntityFramework.Extension;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Si.EntityFramework.Extension.Helper
 {
     public static class ConcurrencyExtensions
     {
-        /// <summary>
-        /// 使用悲观锁获取实体
-        /// </summary>
         /// <summary>
         /// 使用悲观锁获取实体
         /// </summary>

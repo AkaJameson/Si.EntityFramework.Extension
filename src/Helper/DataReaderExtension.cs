@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace Si.Framework.EntityFramework.Extension
+namespace Si.EntityFramework.Extension.Helper
 {
     public static class DataReaderExtension
     {

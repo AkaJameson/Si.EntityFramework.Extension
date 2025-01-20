@@ -34,22 +34,7 @@ paket add Si.EntityFramework.Extension --version xxxxx
 
 ## 🚀 快速开始
 
-### 1. 参数配置
-
-```c#
-services.Configure<SiDbContextOptions>(options =>
-{
-options.EnableSnowflakeId = true; // 启用雪花ID
-options.EnableSoftDelete = true; // 启用软删除
-options.EnableAudit = true; // 启用审计
-options.WorkerId = 1; // 雪花ID的WorkerId
-options.DatacenterId = 1; // 雪花ID的DatacenterId
-});
-// 如果启用审计功能，需要注册当前用户服务
-services.AddScoped<ICurrentUser, YourCurrentUserImplementation>();
-```
-
-###2.创建dbContext
+###1.创建dbContext
 
 ```c#
 public class YourDbContext : SiDbContextBase
@@ -60,12 +45,32 @@ public class YourDbContext : SiDbContextBase
 }
 ```
 
-### 3. 注册服务
+### 2. 注册服务
 
 ```c#
+//注册DbContext
+builder.Services.AddSiDbContext<YourDbContext>(option =>
+ {
+     option.UseSqlite("Data Source=mydatabase.db");
+ }, ExtensionOptions =>
+    {
+        // 启用审计日志
+        ExtensionOptions.EnableAudit = true;
+        // 启用软删除
+        ExtensionOptions.EnableSoftDelete = true;
+        // 启用雪花ID
+        ExtensionOptions.EnableSnowflakeId = true;
+        // 设置数据中心ID和机器ID
+        ExtensionOptions.DatacenterId = 1;
+        ExtensionOptions.WorkerId = 1;
+    });
+// 如果启用审计功能，需要注册当前用户服务
+ builder.Services.AddCurrentUserAccessor(provider =>
+ {
+     // 自定义获取当前用户的方法
+ });
+//启用工作单元
 services.AddScoped<IUnitOfWork, UnitOfWork<YourDbContext>>();
-services.AddDbContext<YourDbContext>(options => 
-    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 ```
 
 ### 4. 使用工作单元和仓储
