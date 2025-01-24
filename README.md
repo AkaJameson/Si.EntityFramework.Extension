@@ -29,7 +29,7 @@
 ## 📦 安装
 
 ```
-paket add Si.EntityFramework.Extension --version xxxxx
+package add Si.EntityFramework.Extension --version xxxxx
 ```
 
 ## 🚀 快速开始

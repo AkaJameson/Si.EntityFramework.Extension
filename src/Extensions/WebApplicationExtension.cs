@@ -28,7 +28,7 @@ namespace Si.EntityFramework.Extension
         /// <param name="CurrentUserFactory"></param>
         public static void AddCurrentUserAccessor(this IServiceCollection services, Func<IServiceProvider, ICurrentUser> CurrentUserFactory)
         {
-            services.AddScoped(CurrentUserFactory);
+            services.AddScoped<ICurrentUser>(CurrentUserFactory);
         }
     }
 }
