@@ -174,7 +174,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 softDelete.DeletedTime = DateTime.Now;
                 if (entity is IFullAudited fullAudited && _dbContext is SiDbContextBase siContext)
                 {
-                    fullAudited.DeletedBy = siContext._currentUser?.UserId ?? "System";
+                    fullAudited.DeletedBy = siContext._currentUser?.UserId.ToString() ?? "System";
                 }
                 await UpdateAsync(entity);
             }
@@ -293,7 +293,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
                     // 应用审计
                     if (_options.EnableAudit)
                     {
-                        var userId = siContext._currentUser?.UserId ?? "System";
+                        var userId = siContext._currentUser?.UserId.ToString() ?? "System";
 
                         foreach (var entry in currentTypeEntries)
                         {

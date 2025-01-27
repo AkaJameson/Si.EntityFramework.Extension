@@ -81,7 +81,7 @@ namespace Si.EntityFramework.Extension.DataBase
         }
         private void ApplyAuditInfo()
         {
-            var userId = _currentUser?.UserId ?? "System";
+            var userId = _currentUser?.UserId.ToString() ?? "System";
             var entries = ChangeTracker.Entries().ToList();
 
             foreach (var entry in entries)

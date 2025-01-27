@@ -1,4 +1,4 @@
 public interface ICurrentUser
 {
-    string UserId { get; }
+    long? UserId { get; }
 } 
