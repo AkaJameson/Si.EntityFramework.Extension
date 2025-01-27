@@ -5,8 +5,13 @@ namespace Si.EntityFramework.Extension.DataBase
 {
     public class SiDbContext : SiDbContextBase
     {
-        public SiDbContext(DbContextOptions options, SiDbContextOptions optionsExtension, ICurrentUser currentUser = null) : base(options, optionsExtension, currentUser)
+        public SiDbContext( DbContextOptions options,
+                            SiDbContextOptions optionsExtension,
+                            ICurrentUser currentUser = null,
+                            ICurrentTenant currentTenant = null)
+                            : base(options, optionsExtension, currentUser, currentTenant)
         {
+
         }
         public IQueryable<T> ReadQuery<T>() where T : class
         {
