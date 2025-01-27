@@ -7,7 +7,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
     public class UnitOfWork<TContext> : IUnitOfWork, IDisposable where TContext : SiDbContext
     {
         private readonly TContext _context;
-        private readonly Dictionary<Type, object> _repositories = new();
+        private static Dictionary<Type, object> _repositories = new();
 
         public UnitOfWork(TContext context)
         {
