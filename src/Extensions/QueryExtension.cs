@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Si.EntityFramework.Extension.Extensions;
 using System.Linq.Expressions;
 
-namespace Si.EntityFramework.Extension.Helper
+namespace Si.EntityFramework.Extension.Extensions
 {
     public static class QueryExtensions
     {

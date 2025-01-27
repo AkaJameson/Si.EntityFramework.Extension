@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Si.EntityFramework.Extension.Helper
+namespace Si.EntityFramework.Extension.Extensions
 {
     public static class ChangeTrackingExtension
     {

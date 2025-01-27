@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Si.EntityFramework.Extension.Helper
+namespace Si.EntityFramework.Extension.Extensions
 {
     public static class ConcurrencyExtensions
     {
