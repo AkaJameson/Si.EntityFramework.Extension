@@ -2,6 +2,7 @@
 using Si.EntityFramework.Extension.Abstraction;
 using Si.EntityFramework.Extension.Entitys;
 using Si.EntityFramework.Extension.Kits;
+using System.Linq.Expressions;
 
 namespace Si.EntityFramework.Extension.DataBase
 {
@@ -10,16 +11,73 @@ namespace Si.EntityFramework.Extension.DataBase
         internal readonly IdGenerator _idGenerator;
         protected internal readonly SiDbContextOptions _siDbContextOptions;
         protected internal readonly ICurrentUser _currentUser;
-        protected SiDbContextBase(DbContextOptions options, SiDbContextOptions siOptions, ICurrentUser currentUser = null)
+        protected internal readonly ICurrentTenant _currentTenant;
+
+        protected SiDbContextBase(
+            DbContextOptions options, 
+            SiDbContextOptions siOptions, 
+            ICurrentUser currentUser = null,
+            ICurrentTenant currentTenant = null)
             : base(options)
         {
             _siDbContextOptions = siOptions;
             _currentUser = currentUser;
+            _currentTenant = currentTenant;
             if (_siDbContextOptions.EnableSnowflakeId)
             {
                 _idGenerator = new IdGenerator(_siDbContextOptions.WorkerId, _siDbContextOptions.DatacenterId);
             }
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            
+            if (_siDbContextOptions.EnableMultiTenant)
+            {
+                foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+                {
+                    if (typeof(IMultiTenant).IsAssignableFrom(entityType.ClrType) && 
+                        !_siDbContextOptions.IgnoredMultiTenantTypes.Contains(entityType.ClrType))
+                    {
+                        var parameter = Expression.Parameter(entityType.ClrType, "e");
+                        var tenantProperty = Expression.Property(parameter, nameof(IMultiTenant.TenantId));
+                        var tenantValue = Expression.Constant(_currentTenant?.TenantId);
+                        var comparison = Expression.Equal(tenantProperty, tenantValue);
+                        var lambda = Expression.Lambda(comparison, parameter);
+                        modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                    }
+                }
+            }
+            
+            if (_siDbContextOptions.EnableSnowflakeId)
+            {
+                ApplySnowflakeId();
+            }
+
+            if (_siDbContextOptions.EnableSoftDelete)
+            {
+                UpdateSoftDeleteState();
+            }
+
+            if (_siDbContextOptions.EnableAudit)
+            {
+                ApplyAuditInfo();
+            }
+        }
+
+        public override int SaveChanges()
+        {
+            ApplyFeatures();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ApplyFeatures();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
         private void ApplyFeatures()
         {
             if (_siDbContextOptions.EnableSnowflakeId)
@@ -37,16 +95,7 @@ namespace Si.EntityFramework.Extension.DataBase
                 ApplyAuditInfo();
             }
         }
-        public override int SaveChanges()
-        {
-            ApplyFeatures();
-            return base.SaveChanges();
-        }
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
-            ApplyFeatures();
-            return base.SaveChangesAsync(cancellationToken);
-        }
+
         private void ApplySnowflakeId()
         {
             if (_idGenerator == null) return;
@@ -62,6 +111,7 @@ namespace Si.EntityFramework.Extension.DataBase
                 }
             }
         }
+
         private void UpdateSoftDeleteState()
         {
             foreach (var entry in ChangeTracker.Entries())
@@ -79,6 +129,7 @@ namespace Si.EntityFramework.Extension.DataBase
                 }
             }
         }
+
         private void ApplyAuditInfo()
         {
             var userId = _currentUser?.UserId.ToString() ?? "System";

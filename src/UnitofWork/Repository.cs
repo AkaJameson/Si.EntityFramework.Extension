@@ -157,16 +157,16 @@ namespace Si.EntityFramework.Extension.UnitofWork
         }
 
 
-        public async Task<bool> IsSoftDeleteEnabled()
+        public bool IsSoftDeleteEnabled()
         {
             return _options.EnableSoftDelete && typeof(ISoftDelete).IsAssignableFrom(typeof(T));
         }
 
         public async Task SoftDeleteAsync(T entity)
         {
-            if (!await IsSoftDeleteEnabled())
+            if (!IsSoftDeleteEnabled())
             {
-                return;
+                throw new InvalidOperationException("Soft delete is not enabled for this entity.");
             }
             if (entity is ISoftDelete softDelete)
             {
@@ -182,10 +182,9 @@ namespace Si.EntityFramework.Extension.UnitofWork
 
         public async Task SoftDeleteRangeAsync(IEnumerable<T> entities)
         {
-            if (!await IsSoftDeleteEnabled())
+            if (!IsSoftDeleteEnabled())
             {
-                await DeleteRangeAsync(entities);
-                return;
+                throw new InvalidOperationException("Soft delete is not enabled for this entity.");
             }
 
             foreach (var entity in entities)
@@ -196,7 +195,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
 
         public async Task RestoreAsync(T entity)
         {
-            if (!await IsSoftDeleteEnabled())
+            if (!IsSoftDeleteEnabled())
             {
                 throw new InvalidOperationException("Soft delete is not enabled for this entity.");
             }
@@ -210,14 +209,13 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 {
                     fullAudited.DeletedBy = null;
                 }
-
                 await UpdateAsync(entity);
             }
         }
 
         public async Task RestoreRangeAsync(IEnumerable<T> entities)
         {
-            if (!await IsSoftDeleteEnabled())
+            if (!IsSoftDeleteEnabled())
             {
                 throw new InvalidOperationException("Soft delete is not enabled for this entity.");
             }
@@ -227,18 +225,6 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 await RestoreAsync(entity);
             }
         }
-
-        public IQueryable<T> GetAllIncludeDeleted()
-        {
-            if (!_options.EnableSoftDelete || !typeof(ISoftDelete).IsAssignableFrom(typeof(T)))
-            {
-                return DbSet;
-            }
-
-            // 移除软删除过滤器
-            return DbSet.IgnoreQueryFilters();
-        }
-
         public async Task<int> SaveRepository(CancellationToken cancellationToken = default)
         {
             var entries = _dbContext.ChangeTracker.Entries().ToList();

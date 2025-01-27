@@ -118,13 +118,34 @@ namespace Si.EntityFramework.Extension.Abstraction
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<int> SaveRepository(CancellationToken cancellationToken = default);
-        Task<bool> IsSoftDeleteEnabled();
+        /// <summary>
+        /// 是否启用软删除
+        /// </summary>
+        /// <returns></returns>
+        bool IsSoftDeleteEnabled();
+        /// <summary>
+        /// 软删除
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         Task SoftDeleteAsync(T entity);
+        /// <summary>
+        /// 批量软删除
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <returns></returns>
         Task SoftDeleteRangeAsync(IEnumerable<T> entities);
+        /// <summary>
+        ///     
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         Task RestoreAsync(T entity);
+        /// <summary>
+        /// 批量恢复
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <returns></returns>
         Task RestoreRangeAsync(IEnumerable<T> entities);
-
-        // 获取包含已软删除项的查询 - 仅当启用软删除时可用
-        IQueryable<T> GetAllIncludeDeleted();
     }
 }

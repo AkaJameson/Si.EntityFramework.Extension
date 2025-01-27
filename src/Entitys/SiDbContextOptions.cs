@@ -26,5 +26,15 @@
         /// 雪花ID的DatacenterId
         /// </summary>
         public int DatacenterId { get; set; } = 1;
+
+        /// <summary>
+        /// 是否启用多租户
+        /// </summary>
+        public bool EnableMultiTenant { get; set; } = false;
+
+        /// <summary>
+        /// 忽略多租户过滤的实体类型
+        /// </summary> 
+        public List<Type> IgnoredMultiTenantTypes { get; set; } = new();
     }
 }
