@@ -4,7 +4,7 @@ using Si.EntityFramework.Extension.DataBase;
 
 namespace Si.EntityFramework.Extension.UnitofWork
 {
-    public class UnitOfWork<TContext> : IUnitOfWork, IDisposable where TContext : SiDbContext
+    public class UnitOfWork<TContext> : IUnitOfWork, IDisposable where TContext : SiDbContextBase
     {
         private readonly TContext _context;
         private static Dictionary<Type, object> _repositories = new();
@@ -32,21 +32,12 @@ namespace Si.EntityFramework.Extension.UnitofWork
         }
 
         /// <summary>
-        /// 提交所有更改，支持事务
+        /// 提交所有更改
         /// </summary>
         /// <returns>受影响的行数</returns>
         public async Task<int> CommitAsync()
         {
             return await _context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// 提交事务并处理异步操作
-        /// </summary>
-        /// <param name="action">需要在事务中执行的操作</param>
-        public async Task ExecuteTransactionAsync(Func<Task> action)
-        {
-            await _context.ExecuteTransactionAsync(action);
         }
 
         /// <summary>
@@ -76,11 +67,6 @@ namespace Si.EntityFramework.Extension.UnitofWork
         public void Dispose()
         {
             _context?.Dispose();
-        }
-
-        public Task ExecuteTransactionWithRetryAsync(Func<Task> action, int retryCount = 3)
-        {
-            return _context.ExecuteWithRetryTransactionAsync(action, retryCount);
         }
     }
 }

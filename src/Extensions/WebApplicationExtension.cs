@@ -10,7 +10,7 @@ namespace Si.EntityFramework.Extension
     public static class WebApplicationExtension
     {
         public static void AddSiDbContext<TContext>(this IServiceCollection services,
-             Action<DbContextOptionsBuilder> optionsAction, Action<SiDbContextOptions> ExtensionOptionsAction = null) where TContext : SiDbContext
+             Action<DbContextOptionsBuilder> optionsAction, Action<SiDbContextOptions> ExtensionOptionsAction = null) where TContext : SiDbContextBase
         {
             var options = new SiDbContextOptions();
             ExtensionOptionsAction?.Invoke(options);
@@ -34,7 +34,7 @@ namespace Si.EntityFramework.Extension
         /// </summary>
         /// <typeparam name="TContext"></typeparam>
         /// <param name="services"></param>
-        public static void AddUnitofWork<TContext>(this IServiceCollection services)where TContext : SiDbContext
+        public static void AddUnitofWork<TContext>(this IServiceCollection services) where TContext : SiDbContextBase
         {
             services.AddScoped<IUnitOfWork, UnitOfWork<TContext>>();
         }

@@ -9,10 +9,10 @@ namespace Si.EntityFramework.Extension.UnitofWork
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly SiDbContext _dbContext;
+        protected readonly SiDbContextBase _dbContext;
         protected readonly DbSet<T> DbSet;
         protected readonly SiDbContextOptions _options;
-        public Repository(SiDbContext dbContext)
+        public Repository(SiDbContextBase dbContext)
         {
             _dbContext = dbContext;
             DbSet = _dbContext.Set<T>();
