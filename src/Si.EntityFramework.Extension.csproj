@@ -3,7 +3,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>8.0.8</Version>
+		<Version>8.1.0</Version>
 		<Authors>Simon Jameson</Authors>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageLicenseFile>License</PackageLicenseFile>
@@ -30,6 +30,8 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" />
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.0" />
 	</ItemGroup>
 
 

@@ -1,6 +1,6 @@
 # Si.EntityFramework.Extension
 
-一个功能强大的 Entity Framework Core 扩展库,提供工作单元、仓储模式、雪花ID、软删除、审计日志等功能。
+一个功能强大的 Entity Framework Core 扩展库,提供工作单元、仓储模式、雪花ID、软删除、审计日志、RBAC权限控制多租户等功能。
 
 ## 📦 安装
 
@@ -20,6 +20,7 @@ dotnet add package Si.EntityFramework.Extension
 - 🔄 事务重试
 - 💾 JSON字段
 - 🔒 并发控制
+- 📱 RBAC 权限控制
 
 ## 🚀 快速开始
 
@@ -190,6 +191,178 @@ foreach(var entry in modifiedEntries)
 }
 ```
 
+## 🔐 RBAC 权限控制
+
+### 1. 配置权限和角色
+
+创建 `rbac.xml` 配置文件:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Rbac>
+    <Permissions>
+        <Permission>
+            <Id>1</Id>
+            <Name>user.read</Name>
+            <Description>查看用户权限</Description>
+        </Permission>
+        <Permission>
+            <Id>2</Id>
+            <Name>user.write</Name>
+            <Description>编辑用户权限</Description>
+        </Permission>
+    </Permissions>
+    <Roles>
+        <Role>
+            <Id>1</Id>
+            <Name>Admin</Name>
+            <Description>管理员</Description>
+            <Permissions>
+                <PermissionId>1</PermissionId>
+                <PermissionId>2</PermissionId>
+            </Permissions>
+        </Role>
+        <Role>
+            <Id>2</Id>
+            <Name>User</Name>
+            <Description>普通用户</Description>
+            <Permissions>
+                <PermissionId>1</PermissionId>
+            </Permissions>
+        </Role>
+    </Roles>
+</Rbac>
+```
+
+### 2. 注册服务
+
+```csharp
+// 注册 RBAC 服务
+builder.Services.AddRbacCore(options =>
+{
+    options.ConfigPath = "rbac.xml";  // 配置文件路径
+    options.SecrectKey = "your-secret-key"; // JWT密钥
+    options.Issuer = "your-issuer";  // JWT颁发者
+    options.Audience = "your-audience"; // JWT接收者
+});
+
+// 使用 RBAC 中间件
+app.UseRbacCore<YourDbContext>();
+```
+
+### 3. 权限注解
+
+```csharp
+// 控制器或方法级别的权限控制
+[Permission("user.read")]
+public class UserController : ControllerBase
+{
+    [Permission("user.write")]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
+    {
+        // 实现创建用户的逻辑
+    }
+    
+    [AllowAnonymous] // 允许匿名访问
+    public async Task<IActionResult> GetPublicInfo()
+    {
+        // 实现获取公开信息的逻辑
+    }
+}
+```
+
+### 4. JWT 令牌生成
+
+```csharp
+public class AuthService
+{
+    private readonly JwtManager _jwtManager;
+    
+    public AuthService(JwtManager jwtManager)
+    {
+        _jwtManager = jwtManager;
+    }
+    
+    public string GenerateToken(User user)
+    {
+        return _jwtManager.GenerateToken(
+            user.Id,
+            user.UserName,
+            user.Roles.Select(r => r.Name).ToList()
+        );
+    }
+}
+```
+
+### 5. 数据模型
+
+```csharp
+// 用户实体
+public class User
+{
+    public int Id { get; set; }
+    public virtual ICollection<Role> Roles { get; set; }
+}
+
+// 角色实体
+public class Role
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public virtual ICollection<Permission> Permissions { get; set; }
+    public virtual ICollection<User> Users { get; set; }
+}
+
+// 权限实体
+public class Permission
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public virtual ICollection<Role> Roles { get; set; }
+}
+```
+
+## 🔑 RBAC 特性
+
+- 基于 JWT 的身份验证
+- 基于角色的权限控制
+- XML 配置权限和角色
+- 权限缓存机制
+- 支持方法和控制器级别的权限控制
+- 支持匿名访问
+- 支持多角色
+- 支持角色继承（通过权限组合）
+
+## ⚠️ RBAC 注意事项
+
+### 配置文件
+- XML 文件需要放在正确的路径
+- 权限和角色的 ID 必须唯一
+- 角色引用的权限 ID 必须存在
+
+### 安全性
+- JWT 密钥要足够复杂且需要妥善保管
+- 建议使用 HTTPS
+- Token 过期时间要合理设置
+- 敏感操作建议添加额外验证
+
+### 性能
+- 权限缓存机制可以提高验证效率
+- 避免过于频繁的角色权限变更
+- 合理设计权限粒度
+
+### 扩展性
+- 可以通过继承 `PermissionAttribute` 实现自定义权限验证
+- 可以通过修改 `JwtManager` 实现自定义令牌生成逻辑
+- 可以通过修改中间件实现自定义验证逻辑
+
+## 📚 相关文档
+
+- [JWT 官方文档](https://jwt.io/)
+- [ASP.NET Core 授权文档](https://docs.microsoft.com/aspnet/core/security/authorization/introduction)
+
 ## 📝 注意事项
 
 ### JSON 字段
@@ -227,3 +400,4 @@ MIT License
 ## 📚 API 文档
 
 详细的 API 文档请参考源代码注释。
+

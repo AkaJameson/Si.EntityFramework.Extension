@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Rbac>
+	<Permissions>
+		<Permission>
+			<Id>1</Id>
+			<Name>Read</Name>
+			<Description>Read permission</Description>
+		</Permission>
+		<Permission>
+			<Id>2</Id>
+			<Name>Write</Name>
+			<Description>Write permission</Description>
+		</Permission>
+	</Permissions>
+	<Roles>
+		<Role>
+			<Id>1</Id>
+			<Name>Admin</Name>
+			<Description>Administrator role</Description>
+			<Permissions>
+				<PermissionId>1</PermissionId>
+				<PermissionId>2</PermissionId>
+			</Permissions>
+		</Role>
+		<Role>
+			<Id>2</Id>
+			<Name>User</Name>
+			<Description>Regular user role</Description>
+			<Permissions>
+				<PermissionId>1</PermissionId>
+			</Permissions>
+		</Role>
+	</Roles>
+</Rbac>
