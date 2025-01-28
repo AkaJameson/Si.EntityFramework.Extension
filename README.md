@@ -1,6 +1,6 @@
 # Si.EntityFramework.Extension
 
-一个功能强大的 Entity Framework Core 扩展库,提供工作单元、仓储模式、雪花ID、软删除、审计日志、RBAC权限控制多租户等功能。
+一个功能强大的 Entity Framework Core 扩展库,提供工作单元、仓储模式、雪花ID、软删除、审计日志、RBAC权限控制、多租户等功能。
 
 ## 📦 安装
 
