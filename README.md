@@ -298,20 +298,20 @@ public class AuthService
 
 ```csharp
 // 用户实体
-public class User
+public class UserBase
 {
     public int Id { get; set; }
     public virtual ICollection<Role> Roles { get; set; }
 }
 
 // 角色实体
-public class Role
+public abstract class Role
 {
     public int Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public virtual ICollection<Permission> Permissions { get; set; }
-    public virtual ICollection<User> Users { get; set; }
+    public virtual ICollection<UserBase> Users { get; set; }
 }
 
 // 权限实体
@@ -322,6 +322,40 @@ public class Permission
     public string Description { get; set; }
     public virtual ICollection<Role> Roles { get; set; }
 }
+/// <summary>
+/// 继承
+/// </summary>
+public class User : UserBase
+{
+    public long Id { get; set; }
+    public string Name { get; set; }
+    public virtual ICollection<Blog> Blogs { get; set; }
+    public virtual ICollection<Essay> Essays { get; set; }
+    public virtual ICollection<Role> Roles { get; set; }
+}
+public class UserConfiguration : IEntityTypeConfiguration<User>
+{
+    public void Configure(EntityTypeBuilder<User> builder)
+    {
+        builder.Property(x => x.Name).HasMaxLength(50);
+        builder.Property(x => x.Account).HasMaxLength(50);
+        builder.Property(x => x.PasswordHash).HasMaxLength(256);
+        builder.HasMany(x => x.Essays).WithOne(x => x.User).HasForeignKey(p => p.UserId);
+        builder.HasMany(x => x.Blogs).WithOne(x => x.User).HasForeignKey(x => x.UserId);
+        //TPH配置
+        builder.HasDiscriminator<string>("UserType").HasValue<User>("User");
+
+    }
+}
+
+## Model配置
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new PermissionConfiguration());
+        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+    }
+
 ```
 
 ## 🔑 RBAC 特性

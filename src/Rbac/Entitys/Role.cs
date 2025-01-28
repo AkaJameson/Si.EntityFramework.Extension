@@ -10,7 +10,7 @@ namespace Si.EntityFramework.PermGuard.Entitys
         public string Description { get; set; }
         //懒加载
         public virtual ICollection<Permission> Permissions { get; set; }
-        public virtual ICollection<IUser> Users { get; set; }
+        public virtual ICollection<UserBase> Users { get; set; }
     }
 
     public class RoleConfiguration : IEntityTypeConfiguration<Role>
