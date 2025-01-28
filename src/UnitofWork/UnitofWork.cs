@@ -4,7 +4,7 @@ using Si.EntityFramework.Extension.DataBase;
 
 namespace Si.EntityFramework.Extension.UnitofWork
 {
-    public class UnitOfWork<TContext> : IUnitOfWork, IDisposable where TContext : SiDbContextBase
+    public class UnitOfWork<TContext> : IUnitOfWork, IDisposable where TContext : ApplicationDbContext
     {
         private readonly TContext _context;
         private static Dictionary<Type, object> _repositories = new();

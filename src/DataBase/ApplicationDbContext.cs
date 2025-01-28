@@ -6,16 +6,16 @@ using System.Linq.Expressions;
 
 namespace Si.EntityFramework.Extension.DataBase
 {
-    public class SiDbContextBase : DbContext
+    public class ApplicationDbContext : DbContext
     {
         internal readonly IdGenerator _idGenerator;
-        protected internal readonly SiDbContextOptions _siDbContextOptions;
+        protected internal readonly ExtensionDbOptions _siDbContextOptions;
         protected internal readonly ICurrentUser _currentUser;
         protected internal readonly ICurrentTenant _currentTenant;
 
-        protected SiDbContextBase(
+        protected ApplicationDbContext(
             DbContextOptions options, 
-            SiDbContextOptions siOptions, 
+            ExtensionDbOptions siOptions, 
             ICurrentUser currentUser = null,
             ICurrentTenant currentTenant = null)
             : base(options)
@@ -32,12 +32,11 @@ namespace Si.EntityFramework.Extension.DataBase
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
             if (_siDbContextOptions.EnableMultiTenant)
             {
                 foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                 {
-                    if (typeof(IMultiTenant).IsAssignableFrom(entityType.ClrType) && 
+                    if (typeof(IMultiTenant).IsAssignableFrom(entityType.ClrType) &&
                         !_siDbContextOptions.IgnoredMultiTenantTypes.Contains(entityType.ClrType))
                     {
                         var parameter = Expression.Parameter(entityType.ClrType, "e");
@@ -48,21 +47,6 @@ namespace Si.EntityFramework.Extension.DataBase
                         modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
                     }
                 }
-            }
-            
-            if (_siDbContextOptions.EnableSnowflakeId)
-            {
-                ApplySnowflakeId();
-            }
-
-            if (_siDbContextOptions.EnableSoftDelete)
-            {
-                UpdateSoftDeleteState();
-            }
-
-            if (_siDbContextOptions.EnableAudit)
-            {
-                ApplyAuditInfo();
             }
         }
 
@@ -76,6 +60,11 @@ namespace Si.EntityFramework.Extension.DataBase
         {
             ApplyFeatures();
             return base.SaveChangesAsync(cancellationToken);
+        }
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            ApplyFeatures();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         private void ApplyFeatures()

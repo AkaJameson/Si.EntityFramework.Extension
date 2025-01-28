@@ -1,6 +1,6 @@
 # Si.EntityFramework.Extension
 
-一个功能强大的Entity Framework Core扩展库，提供工作单元模式、仓储模式、雪花ID生成、软删除、审计日志，多租户支持等功能。
+一个功能强大的 Entity Framework Core 扩展库,提供工作单元、仓储模式、雪花ID、软删除、审计日志等功能。
 
 ## 📦 安装
 
@@ -10,30 +10,30 @@ dotnet add package Si.EntityFramework.Extension
 
 ## ✨ 主要功能
 
-- 🏭 工作单元（UnitOfWork）模式
+- 🏭 工作单元模式
 - 📦 通用仓储模式
-- ❄️ 雪花ID生成器
-- 🗑️ 软删除支持
+- ❄️ 雪花ID生成
+- 🗑️ 软删除
 - 📝 审计日志
-- 🏢 多租户支持
+- 🏢 多租户
 - 📊 性能监控
-- 🔄 事务重试机制
-- 💾 JSON字段支持
+- 🔄 事务重试
+- 💾 JSON字段
 - 🔒 并发控制
 
 ## 🚀 快速开始
 
-### 1. 创建DbContext
+### 1. 创建 DbContext
 
 ```csharp
-public class YourDbContext : SiDbContext
+public class YourDbContext : ApplicationDbContext
 {
     public YourDbContext(
-        DbContextOptions<YourDbContext> options, 
-        IOptions<SiDbContextOptions> siOptions,
+        DbContextOptions options,
+        ExtensionDbOptions extensionOptions,
         ICurrentUser currentUser = null,
-        ICurrentTenant currentTenant = null) 
-        : base(options, siOptions.Value, currentUser, currentTenant)
+        ICurrentTenant currentTenant = null)
+        : base(options, extensionOptions, currentUser, currentTenant)
     {
     }
 }
@@ -42,194 +42,188 @@ public class YourDbContext : SiDbContext
 ### 2. 注册服务
 
 ```csharp
-// 注册DbContext和扩展功能
-builder.Services.AddSiDbContext<YourDbContext>(options =>
+// 注册 DbContext
+builder.Services.AddApplicationDbContext<YourDbContext>(options =>
 {
     options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-}, siOptions =>
+}, options =>
 {
-    siOptions.EnableAudit = true;
-    siOptions.EnableSoftDelete = true;
-    siOptions.EnableSnowflakeId = true;
-    siOptions.EnableMultiTenant = true;
-    siOptions.DatacenterId = 1;
-    siOptions.WorkerId = 1;
+    options.EnableAudit = true;
+    options.EnableSoftDelete = true;
+    options.EnableSnowflakeId = true;
+    options.EnableMultiTenant = true;
+    options.WorkerId = 1;
+    options.DatacenterId = 1;
 });
 
 // 注册工作单元
 builder.Services.AddUnitofWork<YourDbContext>();
 
-// 注册当前用户访问器（如果启用审计功能）
-builder.Services.AddCurrentUserAccessor(provider =>
-{
-    // 实现获取当前用户的逻辑
-    return new CurrentUser();
-});
+// 注册当前用户
+builder.Services.AddCurrentUserAccessor(provider => new CurrentUser());
 
-// 注册当前租户访问器（如果启用多租户）
-builder.Services.AddCurrentTenantAccessor(provider =>
-{
-    // 实现获取当前租户的逻辑
-    return new CurrentTenant();
-});
-```
-
-### 3. 实体配置
-
-#### 雪花ID实体
-```csharp
-public class User : ISnowflakeId
-{
-    public long Id { get; set; }
-    public string Name { get; set; }
-}
-```
-
-#### 软删除实体
-```csharp
-public class Product : ISoftDelete
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime? DeletedTime { get; set; }
-}
-```
-
-#### 审计实体
-```csharp
-public class Order : AuditedEntityBase
-{
-    public int Id { get; set; }
-    public decimal Amount { get; set; }
-}
-```
-
-#### 多租户实体
-```csharp
-public class Customer : IMultiTenant
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string TenantId { get; set; }
-}
-```
-
-### 4. 使用工作单元和仓储
-
-```csharp
-public class UserService
-{
-    private readonly IUnitOfWork _unitOfWork;
-
-    public UserService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
-
-    public async Task CreateUserAsync(User user)
-    {
-        var repository = _unitOfWork.GetRepository<User>();
-        
-        await _unitOfWork.ExecuteTransactionWithRetryAsync(async () =>
-        {
-            await repository.AddAsync(user);
-            await _unitOfWork.CommitAsync();
-        }, retryCount: 3);
-    }
-}
+// 注册当前租户
+builder.Services.AddCurrentTenantAccessor(provider => new CurrentTenant());
 ```
 
 ## 💡 高级功能
 
-### JSON字段支持
+### 仓储模式 API
 
 ```csharp
+// 1. 基础查询
+var repository = _unitOfWork.GetRepository<User>();
+var user = await repository.GetByIdAsync(1);
+var users = await repository.GetAllAsync();
+var activeUsers = await repository.FindAsync(u => u.IsActive);
+var admin = await repository.SingleOrDefaultAsync(u => u.Role == "Admin");
+
+// 2. 分页查询
+var pagedUsers = await repository.GetPagedListAsync(1, 10);
+
+// 3. 添加实体
+await repository.AddAsync(user);
+await repository.AddRangeAsync(users);
+
+// 4. 更新实体
+await repository.ForceUpdateAsync(user);
+await repository.ForceUpdateRangeAsync(users);
+
+// 5. 删除实体
+await repository.DeleteAsync(user);
+await repository.DeleteRangeAsync(users);
+```
+
+### 原生 SQL 查询
+
+```csharp
+// 1. 查询返回实体集合
+var users = await dbContext.Database.FromSqlCollectionAsync<UserDto>(
+    "SELECT * FROM Users WHERE Age > @p0",
+    new SqlParameter("@p0", 18)
+);
+
+// 2. 查询返回 DataTable
+var dt = await dbContext.Database.SqlQueryAsync(
+    CommandType.Text,
+    "SELECT * FROM Users WHERE DepartmentId = @deptId",
+    new SqlParameter("@deptId", 1)
+);
+
+// 3. 执行存储过程
+var result = await dbContext.Database.SqlQueryAsync(
+    CommandType.StoredProcedure,
+    "sp_GetUserStats",
+    new SqlParameter("@startDate", DateTime.Today)
+);
+```
+
+### JSON 字段支持
+
+```csharp
+// 1. 实体配置
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
+        // 配置单个对象为 JSON
         builder.Property(u => u.Settings)
             .HasJsonConversion();
             
+        // 配置集合为 JSON
         builder.Property(u => u.Tags)
             .HasJsonConversion();
     }
 }
-```
 
-### 并发控制
-
-```csharp
-// 悲观锁
-var user = await dbContext.GetWithLockAsync<User>(userId);
-
-// 乐观锁
-var success = await dbContext.TryOptimisticUpdateAsync(user, entity => 
+// 2. 实体定义
+public class User
 {
-    entity.Name = "新名字";
-});
+    public int Id { get; set; }
+    public UserSettings Settings { get; set; }
+    public List<string> Tags { get; set; }
+}
 ```
 
-### 性能监控
+### 查询扩展
 
 ```csharp
-services.AddDbContext<YourDbContext>((sp, options) => 
+// 1. 条件查询
+var query = dbContext.Users
+    .WhereIf(age.HasValue, u => u.Age >= age.Value)
+    .WhereIf(!string.IsNullOrEmpty(name), u => u.Name.Contains(name));
+
+// 2. 分页查询
+var pagedUsers = await query
+    .PageBy(pageIndex, pageSize)
+    .ToListAsync();
+
+// 3. 带总数的分页查询
+var (items, total) = await query
+    .ToPagedListAsync(pageIndex, pageSize);
+
+// 4. 禁用跟踪查询
+var users = await query
+    .AsNoTracking(true)
+    .ToListAsync();
+```
+
+### 变更追踪
+
+```csharp
+// 1. 获取修改的实体
+var modifiedEntries = dbContext.ChangeTracker.GetModifiedEntries();
+
+// 2. 获取修改的属性
+foreach(var entry in modifiedEntries)
 {
-    options.UseSqlServer(connectionString)
-           .AddInterceptors(new QueryPerformanceInterceptor());
-});
-```
-
-### 直接SQL查询
-
-```csharp
-var results = await dbContext.Database.FromSqlCollectionAsync<UserDto>(
-    "SELECT * FROM Users WHERE Age > @p0",
-    new SqlParameter("@p0", 18)
-);
+    var modifiedProps = entry.GetModifiedProperties();
+    
+    // 3. 获取属性的新旧值
+    var modifiedValues = entry.GetModifiedValues();
+    foreach(var (propName, (oldValue, newValue)) in modifiedValues)
+    {
+        Console.WriteLine($"属性: {propName}");
+        Console.WriteLine($"原值: {oldValue}");
+        Console.WriteLine($"新值: {newValue}");
+    }
+}
 ```
 
 ## 📝 注意事项
 
-### JSON字段注意事项
+### JSON 字段
+- JSON 字段在数据库中存储为文本类型
+- 不支持直接在 JSON 字段上进行数据库级别的查询
+- 需要考虑 JSON 字段的大小限制
+- 建议为频繁查询的字段创建额外的列而不是放在 JSON 中
 
-- JSON字段在数据库中存储为文本类型
-- 不支持直接在JSON字段上进行数据库级别的查询
-- 需要考虑JSON字段的大小限制
-- 建议为频繁查询的字段创建额外的列而不是放在JSON中
+### 原生 SQL
+- 使用参数化查询避免 SQL 注入
+- 注意不同数据库的 SQL 语法差异
+- 复杂查询建议使用存储过程
+- 需要注意连接的释放
 
-### 并发控制注意事项
+### 仓储模式
+- 优先使用仓储接口而不是直接访问 DbContext
+- 复杂查询可以扩展仓储接口
+- 注意实体间的关联关系
+- 批量操作时注意性能
 
-- 悲观锁会降低并发性能，建议仅在必要时使用
-- 不同数据库的锁实现可能略有差异
-- 使用乐观锁时需要处理更新失败的情况
-- 建议配合重试机制使用
-
-### 其他注意事项
-
-- 雪花ID生成器需要确保WorkerId和DatacenterId在分布式环境中的唯一性
-- 使用仓储级别保存时需要注意实体间的关联关系
-- 性能监控可能会对性能产生轻微影响，建议在开发环境中使用
+### 其他
+- 雪花 ID 需要确保 WorkerId 和 DatacenterId 唯一
+- 多租户过滤会自动应用到查询
+- 软删除实体默认查询时会过滤已删除记录
+- 变更追踪可能会影响性能，按需使用
 
 ## 📄 许可证
 
 MIT License
 
-Copyright (c) 2025 Simon Jameson
-
-此软件及相关文档文件（以下简称"软件"）在遵循以下条件的情况下，免费提供给任何人：
-
-1. 允许在软件的副本中使用、复制、修改、合并、发布、分发、再授权和/或出售该软件的副本，但必须满足以下条件：
-   
-   - 在所有软件的副本或主要部分中都包含上述版权声明和本许可声明。
-
-2. 本软件是按"原样"提供的，不附带任何形式的明示或暗示的担保，包括但不限于适销性、特定用途的适用性以及非侵权的保证。在任何情况下，作者或版权持有人都不对因软件的使用或其他交易行为而产生的任何索赔、损害或其他责任承担责任，无论是合同、侵权行为还是其他方式。
-
 ## 🤝 贡献
 
-欢迎提交Issue和Pull Request！
+欢迎提交 Issue 和 Pull Request！
 
-## 📚 API文档
+## 📚 API 文档
 
-详细的API文档请参考源代码注释。
+详细的 API 文档请参考源代码注释。

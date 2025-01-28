@@ -9,14 +9,14 @@ namespace Si.EntityFramework.Extension.UnitofWork
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly SiDbContextBase _dbContext;
+        protected readonly ApplicationDbContext _dbContext;
         protected readonly DbSet<T> DbSet;
-        protected readonly SiDbContextOptions _options;
-        public Repository(SiDbContextBase dbContext)
+        protected readonly ExtensionDbOptions _options;
+        public Repository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
             DbSet = _dbContext.Set<T>();
-            _options = (_dbContext as SiDbContextBase)?._siDbContextOptions ?? new SiDbContextOptions();
+            _options = (_dbContext as ApplicationDbContext)?._siDbContextOptions ?? new ExtensionDbOptions();
         }
         public async Task<IEnumerable<T>> GetAllAsync()
         {
@@ -172,7 +172,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
             {
                 softDelete.IsDeleted = true;
                 softDelete.DeletedTime = DateTime.Now;
-                if (entity is IFullAudited fullAudited && _dbContext is SiDbContextBase siContext)
+                if (entity is IFullAudited fullAudited && _dbContext is ApplicationDbContext siContext)
                 {
                     fullAudited.DeletedBy = siContext._currentUser?.UserId.ToString() ?? "System";
                 }
@@ -242,7 +242,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 }
 
                 // 仅当启用相应功能时才应用特性
-                if (_dbContext is SiDbContextBase siContext)
+                if (_dbContext is ApplicationDbContext siContext)
                 {
                     var currentTypeEntries = entries
                         .Where(e => e.Entity.GetType() == typeof(T))

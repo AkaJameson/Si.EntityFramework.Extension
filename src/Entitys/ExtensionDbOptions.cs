@@ -1,6 +1,6 @@
 ﻿namespace Si.EntityFramework.Extension.Entitys
 {
-    public class SiDbContextOptions
+    public class ExtensionDbOptions
     {
         /// <summary>
         /// 是否启用雪花ID

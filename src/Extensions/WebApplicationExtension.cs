@@ -5,14 +5,14 @@ using Si.EntityFramework.Extension.DataBase;
 using Si.EntityFramework.Extension.Entitys;
 using Si.EntityFramework.Extension.UnitofWork;
 
-namespace Si.EntityFramework.Extension
+namespace Si.EntityFramework.Extension.Extensions
 {
     public static class WebApplicationExtension
     {
-        public static void AddSiDbContext<TContext>(this IServiceCollection services,
-             Action<DbContextOptionsBuilder> optionsAction, Action<SiDbContextOptions> ExtensionOptionsAction = null) where TContext : SiDbContextBase
+        public static void AddApplicationDbContext<TContext>(this IServiceCollection services,
+             Action<DbContextOptionsBuilder> optionsAction, Action<ExtensionDbOptions> ExtensionOptionsAction = null) where TContext : ApplicationDbContext
         {
-            var options = new SiDbContextOptions();
+            var options = new ExtensionDbOptions();
             ExtensionOptionsAction?.Invoke(options);
             services.AddSingleton(options);
             services.AddDbContext<TContext>(option =>
@@ -27,14 +27,14 @@ namespace Si.EntityFramework.Extension
         /// <param name="CurrentUserFactory"></param>
         public static void AddCurrentUserAccessor(this IServiceCollection services, Func<IServiceProvider, ICurrentUser> CurrentUserFactory)
         {
-            services.AddScoped<ICurrentUser>(CurrentUserFactory);
+            services.AddScoped(CurrentUserFactory);
         }
         /// <summary>
         /// 添加工作单元
         /// </summary>
         /// <typeparam name="TContext"></typeparam>
         /// <param name="services"></param>
-        public static void AddUnitofWork<TContext>(this IServiceCollection services) where TContext : SiDbContextBase
+        public static void AddUnitofWork<TContext>(this IServiceCollection services) where TContext : ApplicationDbContext
         {
             services.AddScoped<IUnitOfWork, UnitOfWork<TContext>>();
         }
@@ -43,9 +43,9 @@ namespace Si.EntityFramework.Extension
         /// </summary>
         /// <param name="services"></param>
         /// <param name="CurrentTenant"></param>
-        public static void AddCurrentTenantAccessor(this IServiceCollection services,Func<IServiceProvider,ICurrentTenant> CurrentTenant)
+        public static void AddCurrentTenantAccessor(this IServiceCollection services, Func<IServiceProvider, ICurrentTenant> CurrentTenant)
         {
-            services.AddScoped<ICurrentTenant>(CurrentTenant);
+            services.AddScoped(CurrentTenant);
         }
     }
 }

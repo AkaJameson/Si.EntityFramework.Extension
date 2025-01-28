@@ -1,4 +1,4 @@
 public interface IFullAudited : ICreationAudited, IModificationAudited, ISoftDelete
 {
-    string DeletedBy { get; set; }
+    string? DeletedBy { get; set; }
 } 
