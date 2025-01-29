@@ -8,6 +8,5 @@ namespace Si.EntityFramework.Extension.Abstraction
     public interface IUser
     {
         public long Id { get; set; }
-        public abstract ICollection<Role> Roles { get; set; }
     }
 }

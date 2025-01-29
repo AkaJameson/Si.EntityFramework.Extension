@@ -1,4 +1,5 @@
-﻿using Si.EntityFramework.Extension.DataBase;
+﻿using Microsoft.EntityFrameworkCore;
+using Si.EntityFramework.Extension.DataBase;
 using Si.EntityFramework.PermGuard.Entitys;
 
 namespace Si.EntityFramework.PermGuard.Kits
@@ -21,20 +22,31 @@ namespace Si.EntityFramework.PermGuard.Kits
         {
             // 如果数据库中已经有权限表，则不再初始化
             if (_context.Set<Permission>().Any() || _context.Set<Role>().Any())
-                return;
-            // 初始化权限表
-            _context.Set<Permission>().AddRange(_options.Permissions);
-            _context.Set<Role>().AddRange(_options.Roles);
-            _context.SaveChanges();
-            // 初始化权限缓存
-            var cacheList = _context.Set<Role>().ToList();
-            foreach(var role in cacheList)
             {
-                PermCache._roleCache.TryAdd(role.Name, role);
+                var cacheList = _context.Set<Role>()
+                .Include(r => r.Permissions)  // 显式加载权限
+                .ToList();
+
+                foreach (var role in cacheList)
+                {
+                    PermCache._roleCache.TryAdd(role.Name, role.Permissions.Select(p => p.Name).ToHashSet());
+                }
             }
+            else
+            {
+                _context.Set<Permission>().AddRange(_options.Permissions);
+                _context.Set<Role>().AddRange(_options.Roles);
+                _context.SaveChanges();
 
+                var cacheList = _context.Set<Role>()
+                    .Include(r => r.Permissions)  // 显式加载权限
+                    .ToList();
+
+                foreach (var role in cacheList)
+                {
+                    PermCache._roleCache.TryAdd(role.Name, role.Permissions.Select(p => p.Name).ToHashSet());
+                }
+            }
         }
-
-
     }
 }

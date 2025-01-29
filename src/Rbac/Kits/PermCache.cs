@@ -1,14 +1,15 @@
 ﻿using Si.EntityFramework.PermGuard.Entitys;
 using System.Collections.Concurrent;
+using System.Data;
 
 namespace Si.EntityFramework.PermGuard.Kits
 {
     public class PermCache
     {
         /// <summary>
-        /// 角色缓存
+        /// 角色缓存 (RoleName,HashSet(PermissionName)
         /// </summary>
-        internal static ConcurrentDictionary<string, Role> _roleCache = new ConcurrentDictionary<string, Role>();
+        internal static ConcurrentDictionary<string, HashSet<string>> _roleCache = new ConcurrentDictionary<string, HashSet<string>>();
         /// <summary>
         /// 刷新角色缓存
         /// </summary>
@@ -18,7 +19,8 @@ namespace Si.EntityFramework.PermGuard.Kits
             _roleCache.Clear();
             foreach (var item in roles)
             {
-                _roleCache[item.Name] = item;
+                var permissions = item.Permissions.Select(p => p.Name).ToHashSet();
+                _roleCache[item.Name] = permissions;
             }
         }
         /// <summary>
@@ -31,7 +33,7 @@ namespace Si.EntityFramework.PermGuard.Kits
         {
             foreach (var role in roleName ?? new List<string>())
             {
-                if (_roleCache.ContainsKey(role) && _roleCache[role].Permissions.Any(p => p.Name == permissionName))
+                if (_roleCache.ContainsKey(role) && _roleCache[role].Any(p => p.Contains(permissionName)))
                 {
                     return true;
                 }
