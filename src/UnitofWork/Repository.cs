@@ -319,5 +319,15 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 }
             }
         }
+
+        public IQueryable<T> Query()
+        {
+            return DbSet;
+        }
+
+        public IQueryable<T> QueryNoTracking()
+        {
+            return DbSet.AsNoTracking();
+        }
     }
 }

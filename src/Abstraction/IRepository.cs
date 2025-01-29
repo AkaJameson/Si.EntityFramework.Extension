@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Si.EntityFramework.Extension.Abstraction
 {
@@ -147,5 +148,16 @@ namespace Si.EntityFramework.Extension.Abstraction
         /// <param name="entities"></param>
         /// <returns></returns>
         Task RestoreRangeAsync(IEnumerable<T> entities);
+
+        /// <summary>
+        /// 获取查询对象，支持链式调用
+        /// </summary>
+        IQueryable<T> Query();
+
+        /// <summary>
+        /// 获取不跟踪的查询对象，支持链式调用
+        /// </summary>
+        IQueryable<T> QueryNoTracking();
+        
     }
 }
