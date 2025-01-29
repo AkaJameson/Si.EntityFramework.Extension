@@ -9,7 +9,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
     public class UnitOfWork<TContext> : IDisposable, IUnitOfWork where TContext : ApplicationDbContext
     {
         private readonly TContext _context;
-        private static Dictionary<Type, object> _repositories = new();
+        private Dictionary<Type, object> _repositories = new();
         private IDbContextTransaction _currentTransaction;
         public UnitOfWork(TContext context)
         {
