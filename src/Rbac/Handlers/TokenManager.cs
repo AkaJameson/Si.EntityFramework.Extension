@@ -34,6 +34,7 @@ namespace Si.EntityFramework.PermGuard.Handlers
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
                 var userClaims = principal.Claims;
                 claims.AddRange(userClaims);
+                Console.WriteLine($"Validate token for userId: {userClaims.FirstOrDefault(p => p.Type== "UserId")}"); // 添加日志
                 return true;
             }
             catch (Exception)
@@ -50,6 +51,7 @@ namespace Si.EntityFramework.PermGuard.Handlers
                 new Claim("UserId", userId.ToString()),
                 new Claim(ClaimTypes.Name, userName)
             };
+            Console.WriteLine($"Generating token for userId: {userId}"); // 添加日志
             if (TentantId != null)
             {
                 claims.Add(new Claim("TentantId", TentantId));

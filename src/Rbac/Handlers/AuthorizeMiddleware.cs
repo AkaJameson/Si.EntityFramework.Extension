@@ -27,7 +27,7 @@ namespace Si.EntityFramework.PermGuard.Handlers
             }
             // 获取方法上的 PermissionAttribute
             var anonymousAttribute = actionDescriptor.MethodInfo.GetCustomAttribute<AllowAnonymousAttribute>() 
-                ?? actionDescriptor.ControllerTypeInfo.GetCustomAttribute<AllowAnonymousAttribute>(); ;
+                ?? actionDescriptor.ControllerTypeInfo.GetCustomAttribute<AllowAnonymousAttribute>();
             if (anonymousAttribute != null)
             {
                 await _next(context);

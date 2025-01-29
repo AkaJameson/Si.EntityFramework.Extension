@@ -10,7 +10,6 @@ namespace Si.EntityFramework.PermGuard.Entitys
         public string Description { get; set; }
         //懒加载
         public virtual ICollection<Permission> Permissions { get; set; }
-        public virtual ICollection<UserBase> Users { get; set; }
     }
 
     public class RoleConfiguration : IEntityTypeConfiguration<Role>
@@ -21,7 +20,6 @@ namespace Si.EntityFramework.PermGuard.Entitys
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
             builder.Property(x => x.Name).HasMaxLength(50).IsRequired();
             builder.Property(x => x.Description).HasMaxLength(200);
-            builder.HasMany(x => x.Users).WithMany(x => x.Roles).UsingEntity(x => x.ToTable("RoleUser"));
             builder.HasMany(x => x.Permissions).WithMany(x => x.Roles).UsingEntity(x => x.ToTable("RolePermission"));
         }
     }
