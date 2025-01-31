@@ -34,8 +34,8 @@ namespace Si.EntityFramework.Extension.UnitofWork
         }
 
         public async Task<(IEnumerable<T> Items, int TotalCount)> GetPagedAsync(
-            int pageIndex,
-            int pageSize,
+            int pageIndex=1,
+            int pageSize=20,
             Expression<Func<T, bool>> predicate = null,
             Expression<Func<T, object>> orderBy = null,
             bool ascending = true)
@@ -54,7 +54,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
             }
 
-            var items = await query.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
+            var items = await query.Skip((pageIndex-1) * pageSize).Take(pageSize).ToListAsync();
 
             return (items, totalCount);
         }
