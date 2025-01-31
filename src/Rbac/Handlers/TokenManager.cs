@@ -48,13 +48,13 @@ namespace Si.EntityFramework.PermGuard.Handlers
             var claims = new List<Claim>
             {
                 new Claim("UserId", userId.ToString()),
-                new Claim(ClaimTypes.Name, userName)
+                new Claim("UserName", userName)
             };
             if (TentantId != null)
             {
                 claims.Add(new Claim("TentantId", TentantId));
             } 
-            claims.AddRange(roleName.Select(r => new Claim(ClaimTypes.Role, r)));
+            claims.AddRange(roleName.Select(r => new Claim("RoleName", r)));
             var token = new JwtSecurityToken(
                 _rbacOptions.Issuer,
                 _rbacOptions.Audience,

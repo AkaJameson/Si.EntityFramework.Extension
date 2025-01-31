@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Si.EntityFramework.Extension.Abstraction;
 using Si.EntityFramework.Extension.DataBase;
 using Si.EntityFramework.Extension.Entitys;
+using Si.EntityFramework.Extension.Middleware;
 using Si.EntityFramework.Extension.UnitofWork;
 using Si.EntityFramework.PermGuard.Entitys;
 using Si.EntityFramework.PermGuard.Handlers;
@@ -16,6 +18,7 @@ namespace Si.EntityFramework.Extension.Extensions
         public static void AddApplicationDbContext<TContext>(this IServiceCollection services,
              Action<DbContextOptionsBuilder> optionsAction, Action<ExtensionDbOptions> ExtensionOptionsAction = null) where TContext : ApplicationDbContext
         {
+            services.AddScoped<IUserInfo, UserInfo>();
             var options = new ExtensionDbOptions();
             ExtensionOptionsAction?.Invoke(options);
             services.AddSingleton(options);
@@ -25,15 +28,6 @@ namespace Si.EntityFramework.Extension.Extensions
             });
         }
         /// <summary>
-        /// 添加当前用户访问器
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="CurrentUserFactory"></param>
-        public static void AddCurrentUserAccessor(this IServiceCollection services, Func<IServiceProvider, ICurrentUser> CurrentUserFactory)
-        {
-            services.AddScoped(CurrentUserFactory);
-        }
-        /// <summary>
         /// 添加工作单元
         /// </summary>
         /// <typeparam name="TContext"></typeparam>
@@ -41,15 +35,6 @@ namespace Si.EntityFramework.Extension.Extensions
         public static void AddUnitofWork<TContext>(this IServiceCollection services) where TContext : ApplicationDbContext
         {
             services.AddScoped<IUnitOfWork, UnitOfWork<TContext>>();
-        }
-        /// <summary>
-        /// 添加当前租户访问器
-        /// </summary>
-        /// <param name="services"></param>
-        /// <param name="CurrentTenant"></param>
-        public static void AddCurrentTenantAccessor(this IServiceCollection services, Func<IServiceProvider, ICurrentTenant> CurrentTenant)
-        {
-            services.AddScoped(CurrentTenant);
         }
         /// <summary>
         /// 向服务集合中添加RBAC核心服务配置。
@@ -77,6 +62,14 @@ namespace Si.EntityFramework.Extension.Extensions
             var permInitializer = new PermInitializer<DbContext>(_context, option);
             permInitializer.Initialize();
             app.UseMiddleware<AuthorizationMiddleware>();
+        }
+        /// <summary>
+        /// 用户信息查询
+        /// </summary>
+        /// <param name="app"></param>
+        public static void UseInfoParser(this WebApplication app)
+        {
+            app.UseMiddleware<UserInfoMiddleware>();
         }
     }
 }

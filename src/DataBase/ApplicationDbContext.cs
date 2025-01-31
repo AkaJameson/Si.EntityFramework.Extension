@@ -10,19 +10,15 @@ namespace Si.EntityFramework.Extension.DataBase
     {
         internal readonly IdGenerator _idGenerator;
         protected internal readonly ExtensionDbOptions _siDbContextOptions;
-        protected internal readonly ICurrentUser _currentUser;
-        protected internal readonly ICurrentTenant _currentTenant;
-
+        internal readonly IUserInfo sessions;
         protected ApplicationDbContext(
             DbContextOptions options, 
             ExtensionDbOptions siOptions, 
-            ICurrentUser currentUser = null,
-            ICurrentTenant currentTenant = null)
+            IUserInfo sessions = null)
             : base(options)
         {
             _siDbContextOptions = siOptions;
-            _currentUser = currentUser;
-            _currentTenant = currentTenant;
+            this.sessions = sessions;
             if (_siDbContextOptions.EnableSnowflakeId)
             {
                 _idGenerator = new IdGenerator(_siDbContextOptions.WorkerId, _siDbContextOptions.DatacenterId);
@@ -41,7 +37,7 @@ namespace Si.EntityFramework.Extension.DataBase
                     {
                         var parameter = Expression.Parameter(entityType.ClrType, "e");
                         var tenantProperty = Expression.Property(parameter, nameof(IMultiTenant.TenantId));
-                        var tenantValue = Expression.Constant(_currentTenant?.TenantId);
+                        var tenantValue = Expression.Constant(sessions?.TenantId);
                         var comparison = Expression.Equal(tenantProperty, tenantValue);
                         var lambda = Expression.Lambda(comparison, parameter);
                         modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
@@ -121,7 +117,7 @@ namespace Si.EntityFramework.Extension.DataBase
 
         private void ApplyAuditInfo()
         {
-            var userId = _currentUser?.UserId.ToString() ?? "System";
+            var userId = sessions?.UserId.ToString() ?? "System";
             var entries = ChangeTracker.Entries().ToList();
 
             foreach (var entry in entries)
