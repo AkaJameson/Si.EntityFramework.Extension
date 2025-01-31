@@ -4,7 +4,7 @@ using Si.EntityFramework.Extension.Entitys;
 using Si.EntityFramework.Extension.Kits;
 using Si.EntityFramework.PermGuard.Handlers;
 
-namespace Si.EntityFramework.Extension.Middleware
+namespace Si.EntityFramework.Extension.Rbac.Handlers
 {
     internal class UserInfoMiddleware
     {
@@ -45,7 +45,7 @@ namespace Si.EntityFramework.Extension.Middleware
             }
             var tentantId = claims.FirstOrDefault(c => c.Type == "TentantId")?.Value;
             var userName = claims.FirstOrDefault(c => c.Type == "UserName")?.Value;
-            var roles = claims.Where(c => c.Type == "RoleName")?.Select(r=>r.Value)?.ToList();
+            var roles = claims.Where(c => c.Type == "RoleName")?.Select(r => r.Value)?.ToList();
             var session = (IUserInfo)context.RequestServices.GetService(typeof(IUserInfo));
             if (session == null)
             {
