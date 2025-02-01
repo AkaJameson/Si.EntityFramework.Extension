@@ -298,7 +298,7 @@ public class AuthService
 
 ```csharp
 // 用户实体
-public class UserBase
+public interface IUser
 {
     public int Id { get; set; }
     public virtual ICollection<Role> Roles { get; set; }
