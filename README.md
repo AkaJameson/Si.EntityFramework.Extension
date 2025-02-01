@@ -29,14 +29,9 @@ dotnet add package Si.EntityFramework.Extension
 ```csharp
 public class YourDbContext : ApplicationDbContext
 {
-    public YourDbContext(
-        DbContextOptions options,
-        ExtensionDbOptions extensionOptions,
-        ICurrentUser currentUser = null,
-        ICurrentTenant currentTenant = null)
-        : base(options, extensionOptions, currentUser, currentTenant)
-    {
-    }
+    public YourDbContext(DbContextOptions options, ExtensionDbOptions optionsExtension, IUserInfo sessions = null) : base(options, optionsExtension, sessions)
+  {
+  }
 }
 ```
 
@@ -44,18 +39,22 @@ public class YourDbContext : ApplicationDbContext
 
 ```csharp
 // 注册 DbContext
-builder.Services.AddApplicationDbContext<YourDbContext>(options =>
-{
-    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-}, options =>
-{
-    options.EnableAudit = true;
-    options.EnableSoftDelete = true;
-    options.EnableSnowflakeId = true;
-    options.EnableMultiTenant = true;
-    options.WorkerId = 1;
-    options.DatacenterId = 1;
-});
+ builder.Services.AddApplicationDbContext<YourDbContext>(optionAction =>
+ {
+     optionAction.UseMySql(connectionStr, ServerVersion.AutoDetect(connectionStr));
+     //懒加载
+     optionAction.UseLazyLoadingProxies();
+ }, ExtensionOptionsActio =>
+ {
+     //不启动雪花
+     ExtensionOptionsActio.EnableSnowflakeId = false;
+     //启动审计
+     ExtensionOptionsActio.EnableAudit = true;
+     //启动软删除
+     ExtensionOptionsActio.EnableSoftDelete = true;
+     //不启用多租户
+     ExtensionOptionsActio.EnableMultiTenant = false;
+ });
 
 // 注册工作单元
 builder.Services.AddUnitofWork<YourDbContext>();
@@ -65,6 +64,7 @@ builder.Services.AddCurrentUserAccessor(provider => new CurrentUser());
 
 // 注册当前租户
 builder.Services.AddCurrentTenantAccessor(provider => new CurrentTenant());
+
 ```
 
 ## 💡 高级功能
@@ -245,9 +245,13 @@ builder.Services.AddRbacCore(options =>
     options.Issuer = "your-issuer";  // JWT颁发者
     options.Audience = "your-audience"; // JWT接收者
 });
+.....
 
-// 使用 RBAC 中间件
-app.UseRbacCore<YourDbContext>();
+//用户信息解析器（必须在Routing之前）配合权限验证中间件进行使用
+app.UseInfoParser();
+app.UseRouting();
+//添加权限验证中间件
+app.UseRbacCore<BlogDbContext>();
 ```
 
 ### 3. 权限注解
@@ -288,7 +292,8 @@ public class AuthService
         return _jwtManager.GenerateToken(
             user.Id,
             user.UserName,
-            user.Roles.Select(r => r.Name).ToList()
+            user.Roles.Select(r => r.Name).ToList(),
+            user.tenantId
         );
     }
 }
@@ -313,7 +318,19 @@ public abstract class Role
     public virtual ICollection<Permission> Permissions { get; set; }
     public virtual ICollection<UserBase> Users { get; set; }
 }
-
+//用户角色关联表
+public class UserRole
+{
+    public long UserId { get; set;}
+    public int RoleId { get; set; }
+}
+public class RoleUserConfiguration : IEntityTypeConfiguration<UserRole>
+{
+    public void Configure(EntityTypeBuilder<UserRole> builder)
+    {
+        builder.HasKey(x => new { x.UserId, x.RoleId });
+    }
+}
 // 权限实体
 public class Permission
 {
@@ -325,13 +342,12 @@ public class Permission
 /// <summary>
 /// 继承
 /// </summary>
-public class User : UserBase
+public class User : IUser
 {
     public long Id { get; set; }
     public string Name { get; set; }
     public virtual ICollection<Blog> Blogs { get; set; }
     public virtual ICollection<Essay> Essays { get; set; }
-    public virtual ICollection<Role> Roles { get; set; }
 }
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
@@ -342,11 +358,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.PasswordHash).HasMaxLength(256);
         builder.HasMany(x => x.Essays).WithOne(x => x.User).HasForeignKey(p => p.UserId);
         builder.HasMany(x => x.Blogs).WithOne(x => x.User).HasForeignKey(x => x.UserId);
-        //TPH配置
-        builder.HasDiscriminator<string>("UserType").HasValue<User>("User");
-
     }
 }
+
+
+*注：* 因为考虑到用户扩展的原因并未提供User的导航属性对应，请参考UserExtension的类实现这种关系
 
 ## Model配置
 protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -354,6 +370,7 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new PermissionConfiguration());
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new RoleUserConfiguration()); 
     }
 
 ```
