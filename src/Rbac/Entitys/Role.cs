@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Si.EntityFramework.PermGuard.Entitys
+namespace Si.EntityFramework.Extension.Rbac.Entitys
 {
     public class Role
     {

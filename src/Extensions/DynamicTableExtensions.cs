@@ -15,7 +15,7 @@ public static class DynamicTableExtensions
     {
         var router = new TableRouter(options);
         var tableName = router.GetTableName<T>(routeValue);
-        return context.Set<T>().FromSqlRaw($"SELECT * FROM {tableName}");
+        return context.Set<T>().FromSql($"SELECT * FROM {tableName}");
     }
 
     public static async Task<bool> EnsureTableExistsAsync<T>(

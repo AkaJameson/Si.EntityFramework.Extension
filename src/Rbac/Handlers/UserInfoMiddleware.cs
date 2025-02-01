@@ -2,7 +2,6 @@
 using Si.EntityFramework.Extension.Abstraction;
 using Si.EntityFramework.Extension.Entitys;
 using Si.EntityFramework.Extension.Kits;
-using Si.EntityFramework.PermGuard.Handlers;
 
 namespace Si.EntityFramework.Extension.Rbac.Handlers
 {

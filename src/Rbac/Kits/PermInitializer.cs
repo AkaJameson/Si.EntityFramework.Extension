@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Si.EntityFramework.Extension.DataBase;
-using Si.EntityFramework.PermGuard.Entitys;
+using Si.EntityFramework.Extension.Rbac.Entitys;
 
-namespace Si.EntityFramework.PermGuard.Kits
+namespace Si.EntityFramework.Extension.Rbac.Kits
 {
     /// <summary>
     /// 权限初始化器

@@ -1,6 +1,4 @@
-﻿using Si.EntityFramework.PermGuard.Entitys;
-
-namespace Si.EntityFramework.Extension.Abstraction
+﻿namespace Si.EntityFramework.Extension.Abstraction
 {
     /// <summary>
     /// RBAC

@@ -1,8 +1,8 @@
-﻿using Si.EntityFramework.PermGuard.Entitys;
+﻿using Si.EntityFramework.Extension.Rbac.Entitys;
 using System.Collections.Concurrent;
 using System.Data;
 
-namespace Si.EntityFramework.PermGuard.Kits
+namespace Si.EntityFramework.Extension.Rbac.Kits
 {
     public class PermCache
     {

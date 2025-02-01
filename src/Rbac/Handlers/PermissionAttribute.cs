@@ -1,4 +1,4 @@
-﻿namespace Si.EntityFramework.PermGuard.Handlers
+﻿namespace Si.EntityFramework.Extension.Rbac.Handlers
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class PermissionAttribute : Attribute

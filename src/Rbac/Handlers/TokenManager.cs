@@ -1,10 +1,10 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using Si.EntityFramework.PermGuard.Entitys;
+using Si.EntityFramework.Extension.Rbac.Entitys;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Si.EntityFramework.PermGuard.Handlers
+namespace Si.EntityFramework.Extension.Rbac.Handlers
 {
     public class TokenManager
     {
@@ -41,7 +41,7 @@ namespace Si.EntityFramework.PermGuard.Handlers
                 return false;
             }
         }
-        public string GenerateToken(long userId, string userName,List<string> roleName, string TentantId = null)
+        public string GenerateToken(long userId, string userName, List<string> roleName, string TentantId = null)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_rbacOptions.SecrectKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -53,7 +53,7 @@ namespace Si.EntityFramework.PermGuard.Handlers
             if (TentantId != null)
             {
                 claims.Add(new Claim("TentantId", TentantId));
-            } 
+            }
             claims.AddRange(roleName.Select(r => new Claim("RoleName", r)));
             var token = new JwtSecurityToken(
                 _rbacOptions.Issuer,

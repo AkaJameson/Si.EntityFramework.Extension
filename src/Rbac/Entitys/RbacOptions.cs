@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Xml.Linq;
 
-namespace Si.EntityFramework.PermGuard.Entitys
+namespace Si.EntityFramework.Extension.Rbac.Entitys
 {
     public class RbacOptions
     {

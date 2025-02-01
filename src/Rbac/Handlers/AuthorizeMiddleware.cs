@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Si.EntityFramework.Extension.Abstraction;
 using Si.EntityFramework.Extension.Kits;
-using Si.EntityFramework.PermGuard.Kits;
+using Si.EntityFramework.Extension.Rbac.Kits;
 using System.Reflection;
 using System.Security.Claims;
 
-namespace Si.EntityFramework.PermGuard.Handlers
+namespace Si.EntityFramework.Extension.Rbac.Handlers
 {
     public class AuthorizationMiddleware
     {
@@ -27,7 +27,7 @@ namespace Si.EntityFramework.PermGuard.Handlers
             }
             var sessions = (IUserInfo)context?.RequestServices.GetService(typeof(IUserInfo));
             // 获取方法上的 PermissionAttribute
-            var anonymousAttribute = actionDescriptor.MethodInfo.GetCustomAttribute<AllowAnonymousAttribute>() 
+            var anonymousAttribute = actionDescriptor.MethodInfo.GetCustomAttribute<AllowAnonymousAttribute>()
                 ?? actionDescriptor.ControllerTypeInfo.GetCustomAttribute<AllowAnonymousAttribute>();
             if (anonymousAttribute != null)
             {
@@ -41,14 +41,14 @@ namespace Si.EntityFramework.PermGuard.Handlers
                 await Response.ReturnForbiddenResponse(context);
                 return;
             }
-            var hasPermission = await CheckPermissionAsync(context,sessions, PermissionAttribute);
+            var hasPermission = await CheckPermissionAsync(context, sessions, PermissionAttribute);
             if (hasPermission)
                 await _next(context);
         }
-       
-        public async Task<bool> CheckPermissionAsync(HttpContext context,IUserInfo userSessions, PermissionAttribute permissionAttribute)
+
+        public async Task<bool> CheckPermissionAsync(HttpContext context, IUserInfo userSessions, PermissionAttribute permissionAttribute)
         {
-            
+
             if (PermCache.HasPermission(userSessions.Roles, permissionAttribute?.PermissionName))
             {
                 return true;
