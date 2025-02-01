@@ -58,13 +58,6 @@ public class YourDbContext : ApplicationDbContext
 
 // 注册工作单元
 builder.Services.AddUnitofWork<YourDbContext>();
-
-// 注册当前用户
-builder.Services.AddCurrentUserAccessor(provider => new CurrentUser());
-
-// 注册当前租户
-builder.Services.AddCurrentTenantAccessor(provider => new CurrentTenant());
-
 ```
 
 ## 💡 高级功能
