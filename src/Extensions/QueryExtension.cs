@@ -35,5 +35,27 @@ namespace Si.EntityFramework.Extension.Extensions
         {
             return condition ? query.AsNoTracking() : query;
         }
+
+        public static IQueryable<T> DistinctBy<T, TKey>(this IQueryable<T> source, Expression<Func<T, TKey>> keySelector)
+        {
+            return source.GroupBy(keySelector)
+                         .Select(group => group.First());
+        }
+        public static void ForEach<T>(this IQueryable<T> source, Action<T> action)
+        {
+            foreach (var item in source.ToList())  // 强制执行查询
+            {
+                action(item);
+            }
+        }
+        public static IQueryable<T> Batch<T>(this IQueryable<T> source, int batchSize, int pageIndex)
+        {
+            return source.Skip(batchSize * (pageIndex - 1))
+                         .Take(batchSize);
+        }
+        public static IQueryable<T> When<T>(this IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicate)
+        {
+            return condition ? source.Where(predicate) : source;
+        }
     }
 }
