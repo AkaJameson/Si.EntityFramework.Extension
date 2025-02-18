@@ -26,20 +26,20 @@ namespace Si.EntityFramework.Extension.Rbac.Handlers
             // 如果 token 格式不正确
             if (!authHeaderStr.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
-                await Response.ReturnBadRequestResponse(context, "Invalid Authorization format.");
+                await Response.ReturnBadRequest(context, "Invalid Authorization format.");
                 return;
             }
             // 获取 token 并验证
             var token = authHeaderStr.Substring(7);
             if (!_jwtManager.ValidateToken(token, out var claims))
             {
-                await Response.ReturnUnauthorizedResponse(context, "Unauthorized.");
+                await Response.ReturnUnauthorized(context, "Unauthorized.");
                 return;
             }
             var userIdstr = claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
             if (string.IsNullOrEmpty(userIdstr) || !long.TryParse(userIdstr, out var userId))
             {
-                await Response.ReturnUnauthorizedResponse(context, "Unauthorized.");
+                await Response.ReturnUnauthorized(context, "Unauthorized.");
                 return;
             }
             var tentantId = claims.FirstOrDefault(c => c.Type == "TentantId")?.Value;

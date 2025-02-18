@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.EntityFramework.Extension.DataBase;
+using Si.EntityFramework.Extension.Database;
 using Si.EntityFramework.Extension.Rbac.Entitys;
 
 namespace Si.EntityFramework.Extension.Rbac.Kits

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Si.EntityFramework.Extension.Abstraction;
-using Si.EntityFramework.Extension.DataBase;
+using Si.EntityFramework.Extension.Database;
 using Si.EntityFramework.Extension.Entitys;
 using Si.EntityFramework.Extension.Rbac.Entitys;
 using Si.EntityFramework.Extension.Rbac.Handlers;

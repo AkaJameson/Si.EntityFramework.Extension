@@ -38,7 +38,7 @@ namespace Si.EntityFramework.Extension.Rbac.Handlers
                 ?? actionDescriptor.ControllerTypeInfo.GetCustomAttribute<PermissionAttribute>();
             if (PermissionAttribute == null)
             {
-                await Response.ReturnForbiddenResponse(context);
+                await Response.ReturnForbidden(context);
                 return;
             }
             var hasPermission = await CheckPermissionAsync(context, sessions, PermissionAttribute);
@@ -53,7 +53,7 @@ namespace Si.EntityFramework.Extension.Rbac.Handlers
             {
                 return true;
             }
-            await Response.ReturnForbiddenResponse(context);
+            await Response.ReturnForbidden(context);
             return false;
         }
     }

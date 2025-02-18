@@ -4,13 +4,13 @@ using Si.EntityFramework.Extension.Entitys;
 using Si.EntityFramework.Extension.Kits;
 using System.Linq.Expressions;
 
-namespace Si.EntityFramework.Extension.DataBase
+namespace Si.EntityFramework.Extension.Database
 {
     public class ApplicationDbContext : DbContext
     {
         internal readonly IdGenerator _idGenerator;
         protected internal readonly ExtensionDbOptions _siDbContextOptions;
-        internal readonly IUserInfo sessions;
+        internal readonly IUserInfo userInfo;
         protected ApplicationDbContext(
             DbContextOptions options, 
             ExtensionDbOptions siOptions, 
@@ -18,7 +18,7 @@ namespace Si.EntityFramework.Extension.DataBase
             : base(options)
         {
             _siDbContextOptions = siOptions;
-            this.sessions = sessions;
+            this.userInfo = sessions;
             if (_siDbContextOptions.EnableSnowflakeId)
             {
                 _idGenerator = new IdGenerator(_siDbContextOptions.WorkerId, _siDbContextOptions.DatacenterId);
@@ -37,7 +37,7 @@ namespace Si.EntityFramework.Extension.DataBase
                     {
                         var parameter = Expression.Parameter(entityType.ClrType, "e");
                         var tenantProperty = Expression.Property(parameter, nameof(IMultiTenant.TenantId));
-                        var tenantValue = Expression.Constant(sessions?.TenantId);
+                        var tenantValue = Expression.Constant(userInfo?.TenantId);
                         var comparison = Expression.Equal(tenantProperty, tenantValue);
                         var lambda = Expression.Lambda(comparison, parameter);
                         modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
@@ -117,7 +117,7 @@ namespace Si.EntityFramework.Extension.DataBase
 
         private void ApplyAuditInfo()
         {
-            var userId = sessions?.UserId.ToString() ?? "System";
+            var userId = userInfo?.UserId.ToString() ?? "System";
             var entries = ChangeTracker.Entries().ToList();
 
             foreach (var entry in entries)

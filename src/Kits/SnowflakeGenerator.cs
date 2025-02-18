@@ -42,15 +42,12 @@
             _workerId = workerId;
             _datacenterId = datacenterId;
         }
-
         public string FetchStr() => Fetch().ToString();
-
         public long Fetch()
         {
             lock (_lock)
             {
                 var timestamp = GetCurrentTimestamp();
-
                 // 解决时钟回拨问题（有限等待）
                 if (timestamp < _lastTimestamp)
                 {
@@ -71,7 +68,6 @@
                             $"严重时钟回拨，拒绝服务。回拨时间：{offset}ms");
                     }
                 }
-
                 // 同一毫秒内序列号递增
                 if (_lastTimestamp == timestamp)
                 {
@@ -94,7 +90,6 @@
                        | _sequence;
             }
         }
-
         private long WaitNextMillis(long lastTimestamp)
         {
             var timestamp = GetCurrentTimestamp();
@@ -105,7 +100,6 @@
             }
             return timestamp;
         }
-
         private static long GetCurrentTimestamp()
         {
             return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

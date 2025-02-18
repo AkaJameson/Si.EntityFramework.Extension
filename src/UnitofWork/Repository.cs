@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Si.EntityFramework.Extension.Abstraction;
-using Si.EntityFramework.Extension.DataBase;
+using Si.EntityFramework.Extension.Database;
 using Si.EntityFramework.Extension.Entitys;
 using System.Linq.Expressions;
 
@@ -111,13 +111,11 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 DbSet.Remove(entity);
             }
         }
-
         public async Task DeleteAsync(Expression<Func<T, bool>> predicate)
         {
             var entities = await DbSet.Where(predicate).ToListAsync();
             DbSet.RemoveRange(entities);
         }
-
         public Task DeleteRangeAsync(IEnumerable<T> entities)
         {
             if (entities == null)
@@ -126,12 +124,10 @@ namespace Si.EntityFramework.Extension.UnitofWork
             DbSet.RemoveRange(entities);
             return Task.CompletedTask;
         }
-
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
         {
             return await DbSet.AnyAsync(predicate);
         }
-
         public async Task<int> CountAsync(Expression<Func<T, bool>> predicate = null)
         {
             if (predicate == null)
@@ -143,25 +139,20 @@ namespace Si.EntityFramework.Extension.UnitofWork
         {
             return await DbSet.FindAsync(id);
         }
-
         public Task UpdateAsync(T entity)
         {
             DbSet.Update(entity);
             return Task.CompletedTask;
         }
-
         public Task UpdateRangeAsync(IEnumerable<T> entities)
         {
             DbSet.UpdateRange(entities);
             return Task.CompletedTask;
         }
-
-
         public bool IsSoftDeleteEnabled()
         {
             return _options.EnableSoftDelete && typeof(ISoftDelete).IsAssignableFrom(typeof(T));
         }
-
         public async Task SoftDeleteAsync(T entity)
         {
             if (!IsSoftDeleteEnabled())
@@ -174,12 +165,11 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 softDelete.DeletedTime = DateTime.Now;
                 if (entity is IFullAudited fullAudited && _dbContext is ApplicationDbContext siContext)
                 {
-                    fullAudited.DeletedBy = siContext.sessions?.UserId.ToString() ?? "System";
+                    fullAudited.DeletedBy = siContext.userInfo?.UserId.ToString() ?? "System";
                 }
                 await UpdateAsync(entity);
             }
         }
-
         public async Task SoftDeleteRangeAsync(IEnumerable<T> entities)
         {
             if (!IsSoftDeleteEnabled())
@@ -192,7 +182,6 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 await SoftDeleteAsync(entity);
             }
         }
-
         public async Task RestoreAsync(T entity)
         {
             if (!IsSoftDeleteEnabled())
@@ -212,7 +201,6 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 await UpdateAsync(entity);
             }
         }
-
         public async Task RestoreRangeAsync(IEnumerable<T> entities)
         {
             if (!IsSoftDeleteEnabled())
@@ -232,7 +220,6 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 .Where(e => e.Entity.GetType() != typeof(T))
                 .ToList();
             var originalStates = new Dictionary<EntityEntry, EntityState>();
-
             try
             {
                 foreach (var entry in otherEntries)
@@ -279,7 +266,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
                     // 应用审计
                     if (_options.EnableAudit)
                     {
-                        var userId = siContext.sessions.UserId.ToString() ?? "System";
+                        var userId = siContext.userInfo.UserId.ToString() ?? "System";
 
                         foreach (var entry in currentTypeEntries)
                         {
@@ -319,12 +306,10 @@ namespace Si.EntityFramework.Extension.UnitofWork
                 }
             }
         }
-
         public IQueryable<T> Query()
         {
             return DbSet;
         }
-
         public IQueryable<T> QueryNoTracking()
         {
             return DbSet.AsNoTracking();
