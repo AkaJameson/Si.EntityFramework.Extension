@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.EntityFramework.Extension.Abstraction;
-using Si.EntityFramework.Extension.Entitys;
-using Si.EntityFramework.Extension.Kits;
+using Si.EntityFramework.Extension.DataBase.Abstraction;
+using Si.EntityFramework.Extension.DataBase.Configuration;
+using Si.EntityFramework.Extension.DataBase.Kits;
 using System.Linq.Expressions;
 
 namespace Si.EntityFramework.Extension.Database
@@ -24,7 +24,6 @@ namespace Si.EntityFramework.Extension.Database
                 _idGenerator = new IdGenerator(_siDbContextOptions.WorkerId, _siDbContextOptions.DatacenterId);
             }
         }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

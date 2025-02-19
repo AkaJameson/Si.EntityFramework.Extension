@@ -1,4 +1,4 @@
-﻿namespace Si.EntityFramework.Extension.Abstraction
+﻿namespace Si.EntityFramework.Extension.DataBase.Abstraction
 {
     public interface ISnowflakeId
     {

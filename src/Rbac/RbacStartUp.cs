@@ -1,39 +1,14 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Si.EntityFramework.Extension.Abstraction;
 using Si.EntityFramework.Extension.Database;
-using Si.EntityFramework.Extension.Entitys;
-using Si.EntityFramework.Extension.Rbac.Entitys;
+using Si.EntityFramework.Extension.Rbac.Configuration;
 using Si.EntityFramework.Extension.Rbac.Handlers;
 using Si.EntityFramework.Extension.Rbac.Kits;
-using Si.EntityFramework.Extension.UnitofWork;
 
-namespace Si.EntityFramework.Extension.Extensions
+namespace Si.EntityFramework.Extension.Rbac
 {
-    public static class WebApplicationExtension
+    public static class RbacStartUp
     {
-        public static void AddApplicationDbContext<TContext>(this IServiceCollection services,
-             Action<DbContextOptionsBuilder> optionsAction, Action<ExtensionDbOptions> ExtensionOptionsAction = null) where TContext : ApplicationDbContext
-        {
-            services.AddScoped<IUserInfo, UserInfo>();
-            var options = new ExtensionDbOptions();
-            ExtensionOptionsAction?.Invoke(options);
-            services.AddSingleton(options);
-            services.AddDbContext<TContext>(option =>
-            {
-                optionsAction(option);
-            });
-        }
-        /// <summary>
-        /// 添加工作单元
-        /// </summary>
-        /// <typeparam name="TContext"></typeparam>
-        /// <param name="services"></param>
-        public static void AddUnitofWork<TContext>(this IServiceCollection services) where TContext : ApplicationDbContext
-        {
-            services.AddScoped<IUnitOfWork, UnitOfWork<TContext>>();
-        }
         /// <summary>
         /// 向服务集合中添加RBAC核心服务配置。
         /// </summary>
@@ -44,8 +19,8 @@ namespace Si.EntityFramework.Extension.Extensions
             var option = new RbacOptions();
             configure(option);
             services.AddSingleton(option);
-            var jwtManager = new TokenManager(option);
-            services.AddSingleton(jwtManager);
+            var tokenManager = new TokenManager(option);
+            services.AddSingleton(tokenManager);
         }
         /// <summary>
         /// 在Web应用程序中使用RBAC核心功能。

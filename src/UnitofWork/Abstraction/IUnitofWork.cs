@@ -1,4 +1,4 @@
-﻿namespace Si.EntityFramework.Extension.Abstraction
+﻿namespace Si.EntityFramework.Extension.UnitofWork.Abstraction
 {
     public interface IUnitOfWork
     {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Text.Json;
 
-namespace Si.EntityFramework.Extension.Extensions
+namespace Si.EntityFramework.Extension.DataBase.Extensions
 {
     public static class JsonColumnExtensions
     {

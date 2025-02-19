@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Si.EntityFramework.Extension.DataBase.Abstraction;
 using System.Linq.Expressions;
 
-namespace Si.EntityFramework.Extension.Abstraction
+namespace Si.EntityFramework.Extension.UnitofWork.Abstraction
 {
     public interface IRepository<T> where T : class
     {
@@ -11,7 +12,6 @@ namespace Si.EntityFramework.Extension.Abstraction
         /// <param name="id">实体的ID</param>
         /// <returns>实体对象</returns>
         Task<T> GetByIdAsync(int id);
-
         /// <summary>
         /// 获取所有实体的异步方法
         /// </summary>
@@ -158,6 +158,5 @@ namespace Si.EntityFramework.Extension.Abstraction
         /// 获取不跟踪的查询对象，支持链式调用
         /// </summary>
         IQueryable<T> QueryNoTracking();
-        
     }
 }

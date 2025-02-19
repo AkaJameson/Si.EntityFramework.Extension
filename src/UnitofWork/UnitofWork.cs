@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Si.EntityFramework.Extension.Abstraction;
 using Si.EntityFramework.Extension.Database;
-using Si.EntityFramework.Extension.Extensions;
+using Si.EntityFramework.Extension.DataBase.Extensions;
+using Si.EntityFramework.Extension.UnitofWork.Abstraction;
 
 namespace Si.EntityFramework.Extension.UnitofWork
 {

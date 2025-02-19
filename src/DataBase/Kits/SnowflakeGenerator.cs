@@ -1,4 +1,4 @@
-﻿namespace Si.EntityFramework.Extension.Kits
+﻿namespace Si.EntityFramework.Extension.DataBase.Kits
 {
     /// <summary>
     /// 增强版雪花ID生成器

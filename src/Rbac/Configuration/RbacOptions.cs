@@ -1,7 +1,8 @@
 ﻿using System.Data;
 using System.Xml.Linq;
+using Si.EntityFramework.Extension.Rbac.Entitys;
 
-namespace Si.EntityFramework.Extension.Rbac.Entitys
+namespace Si.EntityFramework.Extension.Rbac.Configuration
 {
     public class RbacOptions
     {

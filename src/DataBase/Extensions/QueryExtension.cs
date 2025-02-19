@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.EntityFramework.Extension.Extensions;
+using Si.EntityFramework.Extension.DataBase.Extensions;
 using System.Linq.Expressions;
 
-namespace Si.EntityFramework.Extension.Extensions
+namespace Si.EntityFramework.Extension.DataBase.Extensions
 {
     public static class QueryExtensions
     {
@@ -16,8 +16,8 @@ namespace Si.EntityFramework.Extension.Extensions
 
         public static IQueryable<T> PageBy<T>(
             this IQueryable<T> query,
-            int pageIndex,
-            int pageSize)
+            int pageIndex = 1,
+            int pageSize = 20)
         {
             return query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
         }
