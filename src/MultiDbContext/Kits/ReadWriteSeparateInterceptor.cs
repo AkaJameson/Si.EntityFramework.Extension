@@ -8,36 +8,30 @@ using System.Threading.Tasks;
 
 namespace Si.EntityFramework.Extension.MultiDbContext.Kits
 {
-    public class ReadWriteSeparateInterceptor
+    public class ReadWriteSeparateInterceptor : DbCommandInterceptor
     {
-        public class ReadWriteSeparateInterceptor : DbCommandInterceptor
+        public ReadWriteSeparateInterceptor(MutiContext context)
         {
-            private readonly MultiDbContextRouter _context;
 
-            public ReadWriteSeparateInterceptor(MultiDbContextRouter context)
-            {
-                _context = context;
-            }
-
-            public override InterceptionResult<DbDataReader> ReaderExecuting(
-                DbCommand command,
-                CommandEventData eventData,
-                InterceptionResult<DbDataReader> result)
-            {
-                if (IsWriteOperation(command))
-                {
-                    _context.UseMaster();
-                }
-                return base.ReaderExecuting(command, eventData, result);
-            }
-
-            private bool IsWriteOperation(DbCommand command)
-            {
-                return command.CommandText.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase) ||
-                       command.CommandText.StartsWith("UPDATE", StringComparison.OrdinalIgnoreCase) ||
-                       command.CommandText.StartsWith("DELETE", StringComparison.OrdinalIgnoreCase);
-            }
         }
 
+        public override InterceptionResult<DbDataReader> ReaderExecuting(
+            DbCommand command,
+            CommandEventData eventData,
+            InterceptionResult<DbDataReader> result)
+        {
+            if (IsWriteOperation(command))
+            {
+                _context.UseMaster();
+            }
+            return base.ReaderExecuting(command, eventData, result);
+        }
+
+        private bool IsWriteOperation(DbCommand command)
+        {
+            return command.CommandText.StartsWith("INSERT", StringComparison.OrdinalIgnoreCase) ||
+                   command.CommandText.StartsWith("UPDATE", StringComparison.OrdinalIgnoreCase) ||
+                   command.CommandText.StartsWith("DELETE", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }
