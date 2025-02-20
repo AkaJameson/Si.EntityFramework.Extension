@@ -1,9 +1,9 @@
-﻿using Si.EntityFramework.Extension.MultiDbContext.Configuration;
-using Si.EntityFramework.Extension.MultiDbContext.Kits;
+﻿using Si.EntityFramework.Extension.Database;
+using Si.EntityFramework.Extension.MultiDbContext.Configuration;
 
 namespace Si.EntityFramework.Extension.MultiDbContext
 {
-    public partial class DbContextRouter
+    public partial class DbContextRouter<TContext> where TContext : ApplicationDbContext
     {
         private MutiDbOptions _options;
         private readonly List<string> _slaveConnections = new List<string>();

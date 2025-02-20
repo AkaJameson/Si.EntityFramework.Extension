@@ -1,18 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using Si.EntityFramework.Extension.Database;
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Si.EntityFramework.Extension.MultiDbContext.Kits
 {
-    public class ConnectionSwitchInterceptor : DbConnectionInterceptor
+    public class ConnectionSwitchInterceptor<TContext> : DbConnectionInterceptor where TContext : ApplicationDbContext
     {
-        private readonly DbContextRouter router;
-        public ConnectionSwitchInterceptor(DbContextRouter router) :base()
+        private readonly DbContextRouter<TContext> router;
+        public ConnectionSwitchInterceptor(DbContextRouter<TContext> router) : base()
         {
             router = router;
         }

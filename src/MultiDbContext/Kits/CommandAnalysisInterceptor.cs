@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Si.EntityFramework.Extension.MultiDbContext.Kits
 {
-    public class CommandAnalysisInterceptor : DbCommandInterceptor
+    public class CommandAnalysisInterceptor<TContext> : DbCommandInterceptor where TContext : ApplicationDbContext
     {
-        private readonly DbContextRouter router;
-        public CommandAnalysisInterceptor(DbContextRouter router) : base()
+        private readonly DbContextRouter<TContext> router;
+        public CommandAnalysisInterceptor(DbContextRouter<TContext> router) : base()
         {
             router = router;
         }
