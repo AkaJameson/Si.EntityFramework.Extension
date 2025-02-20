@@ -1,6 +1,6 @@
-﻿using Si.EntityFramework.Extension.Abstraction;
+﻿using Si.EntityFramework.Extension.DataBase.Abstraction;
 
-namespace Si.EntityFramework.Extension.Entitys
+namespace Si.EntityFramework.Extension.DataBase.Entitys
 {
     public class UserInfo : IUserInfo
     {

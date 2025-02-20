@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Si.EntityFramework.Extension.Abstraction;
 using Si.EntityFramework.Extension.Database;
-using Si.EntityFramework.Extension.Entitys;
+using Si.EntityFramework.Extension.DataBase.Abstraction;
+using Si.EntityFramework.Extension.DataBase.Configuration;
+using Si.EntityFramework.Extension.UnitofWork.Abstraction;
 using System.Linq.Expressions;
 
 namespace Si.EntityFramework.Extension.UnitofWork

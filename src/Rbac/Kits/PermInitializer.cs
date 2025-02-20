@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Si.EntityFramework.Extension.Database;
+using Si.EntityFramework.Extension.Rbac.Configuration;
 using Si.EntityFramework.Extension.Rbac.Entitys;
 
 namespace Si.EntityFramework.Extension.Rbac.Kits

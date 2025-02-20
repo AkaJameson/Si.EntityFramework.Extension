@@ -1,5 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using Si.EntityFramework.Extension.Rbac.Entitys;
+using Si.EntityFramework.Extension.Rbac.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;

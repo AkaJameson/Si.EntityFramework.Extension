@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Si.EntityFramework.Extension.Abstraction;
-using Si.EntityFramework.Extension.Entitys;
-using Si.EntityFramework.Extension.Kits;
+using Si.EntityFramework.Extension.DataBase.Abstraction;
+using Si.EntityFramework.Extension.Rbac.Kits;
 
 namespace Si.EntityFramework.Extension.Rbac.Handlers
 {

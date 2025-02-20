@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Si.EntityFramework.Extension.Abstraction;
+using Si.EntityFramework.Extension.DataBase.Abstraction;
 using Si.EntityFramework.Extension.Rbac.Entitys;
+using Si.EntityFramework.Extension.UnitofWork.Abstraction;
 
 namespace Si.EntityFramework.Extension.Rbac.Kits
 {

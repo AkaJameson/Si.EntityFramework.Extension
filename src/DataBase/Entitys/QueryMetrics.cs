@@ -1,4 +1,4 @@
-﻿namespace Si.EntityFramework.Extension.Entitys
+﻿namespace Si.EntityFramework.Extension.DataBase.Entitys
 {
     public class QueryMetrics
     {

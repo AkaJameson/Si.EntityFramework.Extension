@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Si.EntityFramework.Extension.Kits
+namespace Si.EntityFramework.Extension.Rbac.Kits
 {
     public class Response
     {
