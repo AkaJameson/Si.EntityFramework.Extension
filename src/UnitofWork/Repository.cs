@@ -12,12 +12,12 @@ namespace Si.EntityFramework.Extension.UnitofWork
     {
         protected readonly ApplicationDbContext _dbContext;
         protected readonly DbSet<T> DbSet;
-        protected readonly ExtensionDbOptions _options;
+        protected readonly ExDbOptions _options;
         public Repository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
             DbSet = _dbContext.Set<T>();
-            _options = (_dbContext as ApplicationDbContext)?._siDbContextOptions ?? new ExtensionDbOptions();
+            _options = (_dbContext as ApplicationDbContext)?.exOptions ?? new ExDbOptions();
         }
         public async Task<IEnumerable<T>> GetAllAsync()
         {

@@ -4,6 +4,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Si.EntityFramework.Extension", "src\Si.EntityFramework.Extension.csproj", "{ECB9242C-D2D6-4D33-94E1-409C78ECF11F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{2DFA62BF-FB14-4E72-BE77-ECEDA45DC055}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{ECB9242C-D2D6-4D33-94E1-409C78ECF11F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECB9242C-D2D6-4D33-94E1-409C78ECF11F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECB9242C-D2D6-4D33-94E1-409C78ECF11F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DFA62BF-FB14-4E72-BE77-ECEDA45DC055}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DFA62BF-FB14-4E72-BE77-ECEDA45DC055}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DFA62BF-FB14-4E72-BE77-ECEDA45DC055}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DFA62BF-FB14-4E72-BE77-ECEDA45DC055}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

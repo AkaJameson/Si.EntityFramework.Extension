@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Si.EntityFramework.Extension.Database;
 using Si.EntityFramework.Extension.DataBase.Abstraction;
 using Si.EntityFramework.Extension.Rbac.Entitys;
 using Si.EntityFramework.Extension.UnitofWork.Abstraction;
@@ -90,7 +91,7 @@ namespace Si.EntityFramework.Extension.Rbac.Kits
         /// <param name="unitOfWork"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        public static async Task<List<Role>> GetRoles(this IUnitOfWork unitOfWork,IUser user)
+        public static async Task<List<Role>> GetRoles<TContext>(this IUnitOfWork<TContext> unitOfWork,IUser user) where TContext : ApplicationDbContext
         {
             var roleIds = unitOfWork.GetRepository<UserRole>().Query().Where(p => p.UserId == user.Id).Select(p => p.RoleId).ToList();
             return await unitOfWork.GetRepository<Role>().Query().Where(p => roleIds.Contains(p.Id)).ToListAsync();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Si.EntityFramework.Extension.DataBase;
 using Si.EntityFramework.Extension.DataBase.Abstraction;
 using Si.EntityFramework.Extension.DataBase.Configuration;
 using Si.EntityFramework.Extension.DataBase.Kits;
@@ -9,30 +10,30 @@ namespace Si.EntityFramework.Extension.Database
     public class ApplicationDbContext : DbContext
     {
         internal readonly IdGenerator _idGenerator;
-        protected internal readonly ExtensionDbOptions _siDbContextOptions;
+        protected internal readonly ExDbOptions exOptions;
         internal readonly IUserInfo userInfo;
         protected ApplicationDbContext(
             DbContextOptions options, 
-            ExtensionDbOptions siOptions, 
             IUserInfo sessions = null)
             : base(options)
         {
-            _siDbContextOptions = siOptions;
+            var typeName = this.GetType().Name;
+            exOptions = DbStartUp.ExOptions.TryGetValue(typeName, out exOptions) ? exOptions : new ExDbOptions();
             this.userInfo = sessions;
-            if (_siDbContextOptions.EnableSnowflakeId)
+            if (exOptions.EnableSnowflakeId)
             {
-                _idGenerator = new IdGenerator(_siDbContextOptions.WorkerId, _siDbContextOptions.DatacenterId);
+                _idGenerator = new IdGenerator(exOptions.WorkerId, exOptions.DatacenterId);
             }
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            if (_siDbContextOptions.EnableMultiTenant)
+            if (exOptions.EnableMultiTenant)
             {
                 foreach (var entityType in modelBuilder.Model.GetEntityTypes())
                 {
                     if (typeof(IMultiTenant).IsAssignableFrom(entityType.ClrType) &&
-                        !_siDbContextOptions.IgnoredMultiTenantTypes.Contains(entityType.ClrType))
+                        !exOptions.IgnoredMultiTenantTypes.Contains(entityType.ClrType))
                     {
                         var parameter = Expression.Parameter(entityType.ClrType, "e");
                         var tenantProperty = Expression.Property(parameter, nameof(IMultiTenant.TenantId));
@@ -64,17 +65,17 @@ namespace Si.EntityFramework.Extension.Database
 
         private void ApplyFeatures()
         {
-            if (_siDbContextOptions.EnableSnowflakeId)
+            if (exOptions.EnableSnowflakeId)
             {
                 ApplySnowflakeId();
             }
 
-            if (_siDbContextOptions.EnableSoftDelete)
+            if (exOptions.EnableSoftDelete)
             {
                 UpdateSoftDeleteState();
             }
 
-            if (_siDbContextOptions.EnableAudit)
+            if (exOptions.EnableAudit)
             {
                 ApplyAuditInfo();
             }

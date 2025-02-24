@@ -13,7 +13,7 @@ namespace Si.EntityFramework.Extension.UnitofWork
         /// <param name="services"></param>
         public static void AddUnitofWork<TContext>(this IServiceCollection services) where TContext : ApplicationDbContext
         {
-            services.AddScoped<IUnitOfWork, UnitOfWork<TContext>>();
+            services.AddScoped<IUnitOfWork<TContext>, UnitOfWork<TContext>>();
         }
     }
 }

@@ -2,7 +2,7 @@
 using Si.EntityFramework.Extension.Database;
 using System.Data.Common;
 
-namespace Si.EntityFramework.Extension.MultiDbContext.Kits
+namespace Si.EntityFramework.Extension.DataBase.Kits
 {
     public class ConnectionSwitchInterceptor<TContext> : DbConnectionInterceptor where TContext : ApplicationDbContext
     {

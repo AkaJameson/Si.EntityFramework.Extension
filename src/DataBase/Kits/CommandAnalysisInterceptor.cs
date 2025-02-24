@@ -3,7 +3,7 @@ using Si.EntityFramework.Extension.Database;
 using System.Data.Common;
 using System.Text;
 
-namespace Si.EntityFramework.Extension.MultiDbContext.Kits
+namespace Si.EntityFramework.Extension.DataBase.Kits
 {
     public class CommandAnalysisInterceptor<TContext> : DbCommandInterceptor where TContext : ApplicationDbContext
     {

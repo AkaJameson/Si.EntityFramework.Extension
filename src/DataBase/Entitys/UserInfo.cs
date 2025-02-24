@@ -4,6 +4,7 @@ namespace Si.EntityFramework.Extension.DataBase.Entitys
 {
     public class UserInfo : IUserInfo
     {
+       
         /// <summary>
         /// 用户ID
         /// </summary>

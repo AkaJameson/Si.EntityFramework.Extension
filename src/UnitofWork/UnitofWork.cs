@@ -6,7 +6,7 @@ using Si.EntityFramework.Extension.UnitofWork.Abstraction;
 
 namespace Si.EntityFramework.Extension.UnitofWork
 {
-    public class UnitOfWork<TContext> : IDisposable, IUnitOfWork where TContext : ApplicationDbContext
+    public class UnitOfWork<TContext> : IDisposable, IUnitOfWork<TContext> where TContext : ApplicationDbContext
     {
         private readonly TContext _context;
         private Dictionary<Type, object> _repositories = new();

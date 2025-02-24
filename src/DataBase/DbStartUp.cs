@@ -1,14 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Si.EntityFramework.Extension.Database;
-using Si.EntityFramework.Extension.DataBase.Abstraction;
 using Si.EntityFramework.Extension.DataBase.Configuration;
-using Si.EntityFramework.Extension.DataBase.Entitys;
+using Si.EntityFramework.Extension.DataBase.Kits;
+using System.Collections.Concurrent;
 
 namespace Si.EntityFramework.Extension.DataBase
 {
     public static class DbStartUp
     {
+        internal static ConcurrentDictionary<string, ExDbOptions> ExOptions = new ConcurrentDictionary<string, ExDbOptions>();
         /// <summary>
         /// 数据库注入服务
         /// </summary>
@@ -16,23 +18,39 @@ namespace Si.EntityFramework.Extension.DataBase
         /// <param name="services"></param>
         /// <param name="optionsAction"></param>
         /// <param name="ExtensionOptionsAction"></param>
-        public static void AddApplicationDbContext<TContext,TExtensionOption>(this IServiceCollection services,
+        public static void AddApplicationDbContext<TContext>(this IServiceCollection services,
                                                                  Action<DbContextOptionsBuilder> optionsAction,
-                                                                 Action<TExtensionOption> ExtensionOptionsAction = null)
-                                                                 where TContext : ApplicationDbContext where TExtensionOption : ExtensionDbOptions,new()
+                                                                 Action<ExDbOptions> ExtensionOptionsAction = null)
+                                                                 where TContext : ApplicationDbContext 
         {
-            services.AddScoped<IUserInfo, UserInfo>();
-            services.AddScoped((sp) =>
-            {
-                return new ExtensionDbOptions();
-            });
-            var options = new TExtensionOption();
+            var options = new ExDbOptions();
             ExtensionOptionsAction?.Invoke(options);
-            services.AddSingleton(options);
+            ExOptions.TryAdd(typeof(TContext).Name, options);
+            services.AddDbContext<TContext>(optionsAction);
+        }
+        public static void AddApplicationDbContext<TContext>(this IServiceCollection services,
+                                                                   Action<DbContextOptionsBuilder> optionsAction, MutiDbOptions mutiDbOptions,
+                                                                   Action<ExDbOptions> ExtensionOptionsAction = null)
+                                                                   where TContext : ApplicationDbContext
+        {
+            services.AddScoped((p) =>
+            {
+                var router = new DbContextRouter<TContext>(mutiDbOptions);
+                return router;
+            });
+            services.AddScoped<CommandAnalysisInterceptor<TContext>>();
+            services.AddScoped<ConnectionSwitchInterceptor<TContext>>();
+            var options = new ExDbOptions();
+            ExtensionOptionsAction?.Invoke(options);
+            DbStartUp.ExOptions.TryAdd(typeof(TContext).Name, options);
             services.AddDbContext<TContext>((sp, optionsBuilder) =>
             {
-                var extensionDbOptions = sp.GetRequiredService<ExtensionDbOptions>();
-                extensionDbOptions = sp.GetRequiredService<TExtensionOption>();
+                var interceptors = new List<DbConnectionInterceptor>
+                {
+                    sp.GetRequiredService<ConnectionSwitchInterceptor<TContext>>(),
+                    sp.GetRequiredService<ConnectionSwitchInterceptor<TContext>>()
+                };
+                optionsBuilder.AddInterceptors(interceptors.ToArray());
                 optionsAction(optionsBuilder);
             });
         }

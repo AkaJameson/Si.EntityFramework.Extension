@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Si.EntityFramework.Extension.Database;
+using Si.EntityFramework.Extension.DataBase.Abstraction;
+using Si.EntityFramework.Extension.DataBase.Entitys;
 using Si.EntityFramework.Extension.Rbac.Configuration;
 using Si.EntityFramework.Extension.Rbac.Handlers;
 using Si.EntityFramework.Extension.Rbac.Kits;
@@ -21,6 +23,7 @@ namespace Si.EntityFramework.Extension.Rbac
             services.AddSingleton(option);
             var tokenManager = new TokenManager(option);
             services.AddSingleton(tokenManager);
+            services.AddScoped<IUserInfo, UserInfo>();
         }
         /// <summary>
         /// 在Web应用程序中使用RBAC核心功能。

@@ -1,4 +1,4 @@
-﻿namespace Si.EntityFramework.Extension.MultiDbContext.Configuration
+﻿namespace Si.EntityFramework.Extension.DataBase.Configuration
 {
     public class MutiDbOptions
     {

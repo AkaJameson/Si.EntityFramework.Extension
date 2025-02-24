@@ -1,7 +1,7 @@
 ﻿using Si.EntityFramework.Extension.Database;
-using Si.EntityFramework.Extension.MultiDbContext.Configuration;
+using Si.EntityFramework.Extension.DataBase.Configuration;
 
-namespace Si.EntityFramework.Extension.MultiDbContext
+namespace Si.EntityFramework.Extension.DataBase
 {
     public partial class DbContextRouter<TContext> where TContext : ApplicationDbContext
     {
@@ -13,7 +13,7 @@ namespace Si.EntityFramework.Extension.MultiDbContext
         public DbContextRouter(MutiDbOptions options)
         {
             _options = options;
-            if (_options.MasterConnectionString == null||_options.SlaveNodes.Count == 0)
+            if (_options.MasterConnectionString == null || _options.SlaveNodes.Count == 0)
             {
                 throw new ArgumentException("MasterConnectionString or SlaveNodes is null or empty.");
             }
