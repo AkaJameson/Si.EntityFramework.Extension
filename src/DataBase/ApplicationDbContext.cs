@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Si.EntityFramework.Extension.DataBase;
 using Si.EntityFramework.Extension.DataBase.Abstraction;
 using Si.EntityFramework.Extension.DataBase.Configuration;
@@ -12,8 +13,9 @@ namespace Si.EntityFramework.Extension.Database
         internal readonly IdGenerator _idGenerator;
         protected internal readonly ExDbOptions exOptions;
         internal readonly IUserInfo userInfo;
+        private readonly IServiceProvider sp;
         protected ApplicationDbContext(
-            DbContextOptions options, 
+            DbContextOptions options, IServiceProvider sp,
             IUserInfo sessions = null)
             : base(options)
         {
@@ -24,6 +26,7 @@ namespace Si.EntityFramework.Extension.Database
             {
                 _idGenerator = new IdGenerator(exOptions.WorkerId, exOptions.DatacenterId);
             }
+            this.sp = sp;
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,7 +48,18 @@ namespace Si.EntityFramework.Extension.Database
                 }
             }
         }
+        public TContext ForceMaster<TContext>() where TContext : ApplicationDbContext
+        {
+            var contextType = this.GetType();
+            var router = sp.GetService<DbContextRouter<TContext>>();
+            if (router != null)
+            {
+                router.ForceMaster();
+            }
+            return (TContext)this;
 
+
+        }
         public override int SaveChanges()
         {
             ApplyFeatures();

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using Si.EntityFramework.Extension.Database;
+using Si.EntityFramework.Extension.DataBase;
 using Si.EntityFramework.Extension.DataBase.Extensions;
 using Si.EntityFramework.Extension.UnitofWork.Abstraction;
 
@@ -11,9 +13,11 @@ namespace Si.EntityFramework.Extension.UnitofWork
         private readonly TContext _context;
         private Dictionary<Type, object> _repositories = new();
         private IDbContextTransaction _currentTransaction;
-        public UnitOfWork(TContext context)
+        private readonly IServiceProvider _sp;
+        public UnitOfWork(TContext context,IServiceProvider sp)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _sp = sp;
         }
 
         /// <summary>
@@ -32,7 +36,19 @@ namespace Si.EntityFramework.Extension.UnitofWork
 
             return (IRepository<T>)_repositories[type];
         }
-
+        /// <summary>
+        /// 强制走主库
+        /// </summary>
+        /// <returns></returns>
+        public IUnitOfWork<TContext> ForceMaster()
+        {
+            var router = _sp.GetService<DbContextRouter<TContext>>();
+            if (router != null)
+            {
+                router.ForceMaster();
+            }
+            return this;
+        }
         /// <summary>
         /// 提交所有更改
         /// </summary>

@@ -21,7 +21,7 @@ namespace Si.EntityFramework.Extension.DataBase.Kits
                 var initialCommand = result.Result;
                 if (initialCommand != null)
                 {
-                    router.IsReadOperation = IsReadCommand(initialCommand);
+                    router.IsReadOperation = !router.ForceDbMaster && IsReadCommand(initialCommand);
                     router.PendingConnection = router.IsReadOperation ? router.GetReadConnection() : router.GetWriteConnection();
                 }
             }

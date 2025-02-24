@@ -33,9 +33,9 @@ namespace Si.EntityFramework.Extension.DataBase
                                                                    Action<ExDbOptions> ExOptionsAction = null)
                                                                    where TContext : ApplicationDbContext
         {
-            services.AddSingleton((p) =>
+            var router = new DbContextRouter<TContext>(mutiDbOptions);
+            services.AddScoped((p) =>
             {
-                var router = new DbContextRouter<TContext>(mutiDbOptions);
                 return router;
             });
             services.AddScoped<CommandAnalysisInterceptor<TContext>>();

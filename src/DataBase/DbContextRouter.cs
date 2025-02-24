@@ -5,22 +5,27 @@ namespace Si.EntityFramework.Extension.DataBase
 {
     public partial class DbContextRouter<TContext> where TContext : ApplicationDbContext
     {
-        private MutiDbOptions _options;
-        private readonly List<string> _slaveConnections = new List<string>();
-        public bool IsReadOperation { get; set; } = false;
-        public string PendingConnection { get; set; } = string.Empty;
-        private int _currentIndex = 0;
-        public DbContextRouter(MutiDbOptions options)
+        public DbContextRouter(MutiDbOptions mutiDbOptions)
         {
-            _options = options;
-            if (_options.MasterConnectionString == null || _options.SlaveNodes.Count == 0)
+            if (mutiDbOptions.MasterConnectionString == null || mutiDbOptions.SlaveNodes.Count == 0)
             {
                 throw new ArgumentException("MasterConnectionString or SlaveNodes is null or empty.");
             }
-            _slaveConnections = _options.SlaveNodes.Select(x => x.ConnectionString).ToList();
+            MasterConnectionString = mutiDbOptions.MasterConnectionString;
+            _slaveConnections = mutiDbOptions.SlaveNodes.Select(x => x.ConnectionString).ToList();
         }
+        internal static string MasterConnectionString { get; set; }
+
+        internal static List<string> _slaveConnections = new List<string>();
+
+        public bool IsReadOperation { get; set; } = false;
+        internal bool ForceDbMaster = false;
+        public string PendingConnection { get; set; } = string.Empty;
+
+        private static int _currentIndex = 0;
+
         public string GetReadConnection() => GetNextSlaveConnection();
-        public string GetWriteConnection() => _options.MasterConnectionString;
+        public string GetWriteConnection() => MasterConnectionString;
         private string GetNextSlaveConnection()
         {
             lock (this)
@@ -30,5 +35,6 @@ namespace Si.EntityFramework.Extension.DataBase
                 return connection;
             }
         }
+        public void ForceMaster() => ForceDbMaster = true;
     }
 }
