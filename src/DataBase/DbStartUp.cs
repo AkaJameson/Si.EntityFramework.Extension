@@ -17,23 +17,23 @@ namespace Si.EntityFramework.Extension.DataBase
         /// <typeparam name="TContext"></typeparam>
         /// <param name="services"></param>
         /// <param name="optionsAction"></param>
-        /// <param name="ExtensionOptionsAction"></param>
+        /// <param name="ExOptionsAction"></param>
         public static void AddApplicationDbContext<TContext>(this IServiceCollection services,
                                                                  Action<DbContextOptionsBuilder> optionsAction,
-                                                                 Action<ExDbOptions> ExtensionOptionsAction = null)
+                                                                 Action<ExDbOptions> ExOptionsAction = null)
                                                                  where TContext : ApplicationDbContext 
         {
             var options = new ExDbOptions();
-            ExtensionOptionsAction?.Invoke(options);
+            ExOptionsAction?.Invoke(options);
             ExOptions.TryAdd(typeof(TContext).Name, options);
             services.AddDbContext<TContext>(optionsAction);
         }
         public static void AddApplicationDbContext<TContext>(this IServiceCollection services,
                                                                    Action<DbContextOptionsBuilder> optionsAction, MutiDbOptions mutiDbOptions,
-                                                                   Action<ExDbOptions> ExtensionOptionsAction = null)
+                                                                   Action<ExDbOptions> ExOptionsAction = null)
                                                                    where TContext : ApplicationDbContext
         {
-            services.AddScoped((p) =>
+            services.AddSingleton((p) =>
             {
                 var router = new DbContextRouter<TContext>(mutiDbOptions);
                 return router;
@@ -41,8 +41,8 @@ namespace Si.EntityFramework.Extension.DataBase
             services.AddScoped<CommandAnalysisInterceptor<TContext>>();
             services.AddScoped<ConnectionSwitchInterceptor<TContext>>();
             var options = new ExDbOptions();
-            ExtensionOptionsAction?.Invoke(options);
-            DbStartUp.ExOptions.TryAdd(typeof(TContext).Name, options);
+            ExOptionsAction?.Invoke(options);
+            ExOptions.TryAdd(typeof(TContext).Name, options);
             services.AddDbContext<TContext>((sp, optionsBuilder) =>
             {
                 var interceptors = new List<DbConnectionInterceptor>
